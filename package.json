@@ -1,0 +1,13 @@
+{
+    "name": "com.astrumforge.bit-core",
+    "version": "0.0.0",
+    "displayName": "Bit Core",
+    "description": "bit-core is a lightweight C# library tailored for Unity3D that offers efficient bitwise manipulation utilities",
+    "unity": "2020.3",
+    "keywords": [],
+    "author": {
+        "name": "David Arayan",
+        "email": "david@astrumforge.com",
+        "url": "https://www.astrumforge.com"
+    }
+}

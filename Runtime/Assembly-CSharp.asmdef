@@ -1,0 +1,14 @@
+{
+    "name": "BitCore.Runtime",
+    "references": [],
+    "includePlatforms": [
+        "Editor",
+        "macOSStandalone",
+        "LinuxStandaloneUniversal",
+        "iOS",
+        "Android",
+        "WindowsStandalone64"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

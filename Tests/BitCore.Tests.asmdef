@@ -1,0 +1,21 @@
+{
+    "name": "BitCore.Tests",
+    "references": [
+        "BitCore.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor",
+        "macOSStandalone",
+        "LinuxStandaloneUniversal",
+        "iOS",
+        "Android",
+        "WindowsStandalone64"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "autoReferenced": true,
+    "testAssemblies": true
+}

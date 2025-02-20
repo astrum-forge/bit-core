@@ -7,462 +7,321 @@
 #endif
 
 using System;
+#if BITCORE_METHOD_INLINE
+using System.Runtime.CompilerServices;
+#endif
 
 namespace BitCore
 {
-    internal class ZKey10Util
-    {
-        public static readonly uint X_MASK = 0x9249249;
-        public static readonly uint Y_MASK = 0x12492492;
-        public static readonly uint Z_MASK = 0x24924924;
-
-        public static readonly uint XY_MASK = X_MASK | Y_MASK;
-        public static readonly uint XZ_MASK = X_MASK | Z_MASK;
-        public static readonly uint YZ_MASK = Y_MASK | Z_MASK;
-#if BITCORE_METHOD_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static uint Encode(uint x, uint y, uint z)
-        {
-            var cx = EncodePart(x);
-            var cy = EncodePart(y);
-            var cz = EncodePart(z);
-
-            return (cz << 2) + (cy << 1) + cx;
-        }
-
-#if BITCORE_METHOD_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static (uint x, uint y, uint z) Decode(uint zKey)
-        {
-            uint cx = DecodePart(zKey >> 0);
-            uint cy = DecodePart(zKey >> 1);
-            uint cz = DecodePart(zKey >> 2);
-
-            return (x: cx, y: cy, z: cz);
-        }
-
-#if BITCORE_METHOD_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static uint EncodePart(uint n)
-        {
-            uint n0 = n & 0x000003ff;
-
-            uint n1 = (n0 ^ (n0 << 16)) & 0xff0000ff;
-            uint n2 = (n1 ^ (n1 << 8)) & 0x0300f00f;
-            uint n3 = (n2 ^ (n2 << 4)) & 0x030c30c3;
-            uint n4 = (n3 ^ (n3 << 2)) & 0x09249249;
-
-            return n4;
-        }
-#if BITCORE_METHOD_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static uint DecodePart(uint n)
-        {
-            uint n0 = n & 0x09249249;
-
-            uint n1 = (n0 ^ (n0 >> 2)) & 0x030c30c3;
-            uint n2 = (n1 ^ (n1 >> 4)) & 0x0300f00f;
-            uint n3 = (n2 ^ (n2 >> 8)) & 0xff0000ff;
-            uint n4 = (n3 ^ (n3 >> 16)) & 0x000003ff;
-
-            return n4;
-        }
-
-        /**
-        * Given a 3 component Meton Key, increment the X component by 1
-        * unit and return the value. This is much more efficient than
-        * encoding/decoding for LUT operations.
-        */
-#if BITSTACK_METHOD_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static uint IncX(uint zKey)
-        {
-            uint sum = (zKey | YZ_MASK) + 1;
-            return (sum & X_MASK) | (zKey & YZ_MASK);
-        }
-
-        /**
-         * Given a 3 component Meton Key, increment the Y component by 1
-         * unit and return the value. This is much more efficient than
-         * encoding/decoding for LUT operations.
-         */
-#if BITSTACK_METHOD_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static uint IncY(uint zKey)
-        {
-            uint sum = (zKey | XZ_MASK) + 2;
-            return (sum & Y_MASK) | (zKey & XZ_MASK);
-        }
-
-        /**
-         * Given a 3 component Meton Key, increment the Z component by 1
-         * unit and return the value. This is much more efficient than
-         * encoding/decoding for LUT operations.
-         */
-#if BITSTACK_METHOD_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static uint IncZ(uint zKey)
-        {
-            uint sum = (zKey | XY_MASK) + 1;
-            return (sum & Z_MASK) | (zKey & XY_MASK);
-        }
-
-        /**
-         * Given a 3 component Meton Key, decrement the X component by 1
-         * unit and return the value. This is much more efficient than
-         * encoding/decoding for LUT operations.
-         */
-#if BITSTACK_METHOD_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static uint DecX(uint zKey)
-        {
-            uint diff = (zKey & X_MASK) - 1;
-            return (diff & X_MASK) | (zKey & YZ_MASK);
-        }
-
-        /**
-         * Given a 3 component Meton Key, decrement the Y component by 1
-         * unit and return the value. This is much more efficient than
-         * encoding/decoding for LUT operations.
-         */
-#if BITSTACK_METHOD_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static uint DecY(uint zKey)
-        {
-            uint diff = (zKey & Y_MASK) - 2;
-            return (diff & Y_MASK) | (zKey & XZ_MASK);
-        }
-
-        /**
-         * Given a 3 component Meton Key, decrement the Z component by 1
-         * unit and return the value. This is much more efficient than
-         * encoding/decoding for LUT operations.
-         */
-#if BITSTACK_METHOD_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static uint DecZ(uint zKey)
-        {
-            uint diff = (zKey & Z_MASK) - 1;
-            return (diff & Z_MASK) | (zKey & XY_MASK);
-        }
-    }
-
-    /**
-     * Simplifies the usage of Morton Key types. This struct
-     * only holds a single uint32 value which represents the morton key.
-     * Each component holds 10 bits of information so 2^10 = 1024 maximum values per component
-     * This key contains 3 components, x, y and z
-     *
-     * Morton Keys can be useful for spatial hashing, or data structures with good
-     * cache locality.
-     *
-     * NOTICE ABOUT PERFORMANCE
-     * 
-     * UNITY_EDITOR or DEBUG flags ensure that common errors are caught. These
-     * flags are removed in production mode so don't rely on try/catch methods.
-     * If performing benchmarks, ensure that the flags are not taken into account.
-     * The flags ensure that common problems are caught in code and taken care of.
-     */
+    /// <summary>
+    /// Provides a simplified representation of a 3-component Morton key.
+    /// This struct encapsulates a single 32‑bit unsigned integer (zKey) that interleaves 10 bits each for x, y, and z.
+    /// Morton keys are useful for spatial hashing and data structures with good cache locality.
+    /// <para>
+    /// In debug builds, input validation is performed; these checks are omitted in production.
+    /// </para>
+    /// </summary>
     public struct ZKey10 : IEquatable<ZKey10>, IEquatable<uint>, IEquatable<(uint x, uint y, uint z)>
     {
         private readonly uint zKey;
 
-        public ZKey10(uint zKey)
-        {
-            this.zKey = zKey;
-        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZKey10"/> struct with the given Morton key.
+        /// </summary>
+        /// <param name="zKey">The Morton key as a 32‑bit unsigned integer.</param>
+        public ZKey10(uint zKey) => this.zKey = zKey;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZKey10"/> struct from a positive integer key.
+        /// </summary>
+        /// <param name="zKey">The Morton key as a positive integer.</param>
         public ZKey10(int zKey)
         {
 #if BITCORE_DEBUG
             if (zKey < 0)
             {
-                BitDebug.Throw("ZKey10(int) - morton key must be positive");
+                BitDebug.Throw("ZKey10(int) - Morton key must be positive");
             }
 #endif
-
             this.zKey = (uint)zKey;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZKey10"/> struct from separate x, y, and z components.
+        /// Each component must be between 0 and 1023 (10 bits).
+        /// </summary>
+        /// <param name="x">The x component.</param>
+        /// <param name="y">The y component.</param>
+        /// <param name="z">The z component.</param>
         public ZKey10(uint x, uint y, uint z)
         {
 #if BITCORE_DEBUG
-            if (x > 1024 || x < 0)
-            {
-                BitDebug.Throw("ZKey10(uint, uint, uint) - morton key x component must be between 0-1023 (10 bits), was " + x);
-            }
-
-            if (y > 1024 || y < 0)
-            {
-                BitDebug.Throw("ZKey10(uint, uint, uint) - morton key y component must be between 0-1023 (10 bits), was " + y);
-            }
-
-            if (z > 1024 || z < 0)
-            {
-                BitDebug.Throw("ZKey10(uint, uint, uint) - morton key z component must be between 0-1023 (10 bits), was " + z);
-            }
+            if (x > 1023)
+                BitDebug.Throw($"ZKey10(uint, uint, uint) - x component must be between 0-1023 (10 bits), was {x}");
+            if (y > 1023)
+                BitDebug.Throw($"ZKey10(uint, uint, uint) - y component must be between 0-1023 (10 bits), was {y}");
+            if (z > 1023)
+                BitDebug.Throw($"ZKey10(uint, uint, uint) - z component must be between 0-1023 (10 bits), was {z}");
 #endif
             zKey = ZKey10Util.Encode(x, y, z);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZKey10"/> struct from separate x, y, and z components.
+        /// Each component must be between 0 and 1023 (10 bits).
+        /// </summary>
+        /// <param name="x">The x component.</param>
+        /// <param name="y">The y component.</param>
+        /// <param name="z">The z component.</param>
         public ZKey10(int x, int y, int z)
         {
 #if BITCORE_DEBUG
-            if (x > 1024 || x < 0)
-            {
-                BitDebug.Throw("ZKey10(int, int, int) - morton key x component must be between 0-1023 (10 bits), was " + x);
-            }
-
-            if (y > 1024 || y < 0)
-            {
-                BitDebug.Throw("ZKey10(int, int, int) - morton key y component must be between 0-1023 (10 bits), was " + y);
-            }
-
-            if (z > 1024 || z < 0)
-            {
-                BitDebug.Throw("ZKey10(int, int, int) - morton key z component must be between 0-1023 (10 bits), was " + z);
-            }
+            if (x < 0 || x > 1023)
+                BitDebug.Throw($"ZKey10(int, int, int) - x component must be between 0-1023 (10 bits), was {x}");
+            if (y < 0 || y > 1023)
+                BitDebug.Throw($"ZKey10(int, int, int) - y component must be between 0-1023 (10 bits), was {y}");
+            if (z < 0 || z > 1023)
+                BitDebug.Throw($"ZKey10(int, int, int) - z component must be between 0-1023 (10 bits), was {z}");
 #endif
             zKey = ZKey10Util.Encode((uint)x, (uint)y, (uint)z);
         }
 
-        public uint key
-        {
-            get
-            {
-                return zKey;
-            }
-        }
+        /// <summary>
+        /// Gets the raw Morton key.
+        /// </summary>
+        public uint key => zKey;
 
-        public uint x
-        {
-            get
-            {
-                return ZKey10Util.DecodePart(zKey);
-            }
-        }
+        /// <summary>
+        /// Gets the x component of the Morton key.
+        /// </summary>
+        public uint x => ZKey10Util.DecodePart(zKey);
 
-        public uint y
-        {
-            get
-            {
-                return ZKey10Util.DecodePart(zKey >> 1);
-            }
-        }
+        /// <summary>
+        /// Gets the y component of the Morton key.
+        /// </summary>
+        public uint y => ZKey10Util.DecodePart(zKey >> 1);
 
-        public uint z
-        {
-            get
-            {
-                return ZKey10Util.DecodePart(zKey >> 2);
-            }
-        }
+        /// <summary>
+        /// Gets the z component of the Morton key.
+        /// </summary>
+        public uint z => ZKey10Util.DecodePart(zKey >> 2);
 
-        public (uint x, uint y, uint z) RawValue
-        {
-            get
-            {
-                return ZKey10Util.Decode(key);
-            }
-        }
+        /// <summary>
+        /// Gets the raw (x, y, z) components of the Morton key.
+        /// </summary>
+        public (uint x, uint y, uint z) RawValue => ZKey10Util.Decode(zKey);
 
-        public ZKey10 IncX()
-        {
-            return new ZKey10(ZKey10Util.IncX(zKey));
-        }
+        /// <summary>
+        /// Increments the x component of the Morton key by one unit.
+        /// </summary>
+        public ZKey10 IncX() => new ZKey10(ZKey10Util.IncX(zKey));
 
-        public ZKey10 IncY()
-        {
-            return new ZKey10(ZKey10Util.IncY(zKey));
-        }
+        /// <summary>
+        /// Increments the y component of the Morton key by one unit.
+        /// </summary>
+        public ZKey10 IncY() => new ZKey10(ZKey10Util.IncY(zKey));
 
-        public ZKey10 IncZ()
-        {
-            return new ZKey10(ZKey10Util.IncZ(zKey));
-        }
+        /// <summary>
+        /// Increments the z component of the Morton key by one unit.
+        /// </summary>
+        public ZKey10 IncZ() => new ZKey10(ZKey10Util.IncZ(zKey));
 
+        /// <summary>
+        /// Increments the x and y components of the Morton key by one unit each.
+        /// </summary>
         public ZKey10 IncXY()
         {
             uint key = zKey;
-
             key = ZKey10Util.IncX(key);
             key = ZKey10Util.IncY(key);
-
             return new ZKey10(key);
         }
 
+        /// <summary>
+        /// Increments the x and z components of the Morton key by one unit each.
+        /// </summary>
         public ZKey10 IncXZ()
         {
             uint key = zKey;
-
             key = ZKey10Util.IncX(key);
             key = ZKey10Util.IncZ(key);
-
             return new ZKey10(key);
         }
 
+        /// <summary>
+        /// Increments the y and z components of the Morton key by one unit each.
+        /// </summary>
         public ZKey10 IncYZ()
         {
             uint key = zKey;
-
             key = ZKey10Util.IncY(key);
             key = ZKey10Util.IncZ(key);
-
             return new ZKey10(key);
         }
 
+        /// <summary>
+        /// Increments all three components (x, y, and z) of the Morton key by one unit.
+        /// </summary>
         public ZKey10 IncXYZ()
         {
             uint key = zKey;
-
             key = ZKey10Util.IncX(key);
             key = ZKey10Util.IncY(key);
             key = ZKey10Util.IncZ(key);
-
             return new ZKey10(key);
         }
 
-        public ZKey10 DecX()
-        {
-            return new ZKey10(ZKey10Util.DecX(zKey));
-        }
+        /// <summary>
+        /// Decrements the x component of the Morton key by one unit.
+        /// </summary>
+        public ZKey10 DecX() => new ZKey10(ZKey10Util.DecX(zKey));
 
-        public ZKey10 DecY()
-        {
-            return new ZKey10(ZKey10Util.DecY(zKey));
-        }
+        /// <summary>
+        /// Decrements the y component of the Morton key by one unit.
+        /// </summary>
+        public ZKey10 DecY() => new ZKey10(ZKey10Util.DecY(zKey));
 
-        public ZKey10 DecZ()
-        {
-            return new ZKey10(ZKey10Util.DecZ(zKey));
-        }
+        /// <summary>
+        /// Decrements the z component of the Morton key by one unit.
+        /// </summary>
+        public ZKey10 DecZ() => new ZKey10(ZKey10Util.DecZ(zKey));
 
+        /// <summary>
+        /// Decrements the x and y components of the Morton key by one unit each.
+        /// </summary>
         public ZKey10 DecXY()
         {
             uint key = zKey;
-
             key = ZKey10Util.DecX(key);
             key = ZKey10Util.DecY(key);
-
             return new ZKey10(key);
         }
 
+        /// <summary>
+        /// Decrements the x and z components of the Morton key by one unit each.
+        /// </summary>
         public ZKey10 DecXZ()
         {
             uint key = zKey;
-
             key = ZKey10Util.DecX(key);
             key = ZKey10Util.DecZ(key);
-
             return new ZKey10(key);
         }
 
+        /// <summary>
+        /// Decrements the y and z components of the Morton key by one unit each.
+        /// </summary>
         public ZKey10 DecYZ()
         {
             uint key = zKey;
-
             key = ZKey10Util.DecY(key);
             key = ZKey10Util.DecZ(key);
-
             return new ZKey10(key);
         }
 
+        /// <summary>
+        /// Decrements all three components (x, y, and z) of the Morton key by one unit.
+        /// </summary>
         public ZKey10 DecXYZ()
         {
             uint key = zKey;
-
             key = ZKey10Util.DecX(key);
             key = ZKey10Util.DecY(key);
             key = ZKey10Util.DecZ(key);
-
             return new ZKey10(key);
         }
 
-        public ZKey10 Mod(uint modulo)
-        {
-            return new ZKey10(zKey % modulo);
-        }
+        /// <summary>
+        /// Returns a new Morton key with the key value modulo the specified value.
+        /// </summary>
+        /// <param name="modulo">The modulo value.</param>
+        public ZKey10 Mod(uint modulo) => new ZKey10(zKey % modulo);
 
-        public ZKey10 Mask(uint mask)
-        {
-            return new ZKey10(zKey & mask);
-        }
+        /// <summary>
+        /// Returns a new Morton key with the key value masked by the specified mask.
+        /// </summary>
+        /// <param name="mask">The mask to apply.</param>
+        public ZKey10 Mask(uint mask) => new ZKey10(zKey & mask);
 
-        /**
-         * Overrides - ZKey10(1,2,3) + ZKey10(4,5,6) = ZKey10(5,7,9)
-         */
+        /// <summary>
+        /// Adds two Morton keys component-wise.
+        /// For example, ZKey10(1,2,3) + ZKey10(4,5,6) yields ZKey10(5,7,9).
+        /// </summary>
+        /// <param name="x">The first Morton key.</param>
+        /// <param name="y">The second Morton key.</param>
+        /// <returns>The component-wise sum as a new Morton key.</returns>
         public static ZKey10 operator +(ZKey10 x, ZKey10 y)
         {
-            uint sum_x = (x.zKey | ZKey10Util.YZ_MASK) + (y.zKey & ZKey10Util.X_MASK);
-            uint sum_y = (x.zKey | ZKey10Util.XZ_MASK) + (y.zKey & ZKey10Util.Y_MASK);
-            uint sum_z = (x.zKey | ZKey10Util.XY_MASK) + (y.zKey & ZKey10Util.Z_MASK);
+            uint sumX = (x.zKey | ZKey10Util.YZ_MASK) + (y.zKey & ZKey10Util.X_MASK);
+            uint sumY = (x.zKey | ZKey10Util.XZ_MASK) + (y.zKey & ZKey10Util.Y_MASK);
+            uint sumZ = (x.zKey | ZKey10Util.XY_MASK) + (y.zKey & ZKey10Util.Z_MASK);
 
-            return new ZKey10((sum_x & ZKey10Util.X_MASK) | (sum_y & ZKey10Util.Y_MASK) | (sum_z & ZKey10Util.Z_MASK));
+            return new ZKey10((sumX & ZKey10Util.X_MASK) | (sumY & ZKey10Util.Y_MASK) | (sumZ & ZKey10Util.Z_MASK));
         }
 
-        /**
-         * Overrides - ZKey10(1,2,3) * ZKey10(4,5,6) = ZKey10(4,10,18)
-         */
+        /// <summary>
+        /// Multiplies two Morton keys component-wise.
+        /// For example, ZKey10(1,2,3) * ZKey10(4,5,6) yields ZKey10(4,10,18).
+        /// </summary>
+        /// <param name="x">The first Morton key.</param>
+        /// <param name="y">The second Morton key.</param>
+        /// <returns>The component-wise product as a new Morton key.</returns>
         public static ZKey10 operator *(ZKey10 x, ZKey10 y)
         {
-            // TO-DO, these needs to be replaced with a more efficient method
+            // TO-DO: Replace with a more efficient method if needed.
             var vx = x.RawValue;
             var vy = y.RawValue;
-
             return new ZKey10((uint)(vx.x * vy.x), (uint)(vx.y * vy.y), (uint)(vx.z * vy.z));
         }
 
-        /**
-         * Overrides - ZKey10(1,2,3) * 4 = ZKey10(4,8,12)
-         */
+        /// <summary>
+        /// Multiplies each component of the Morton key by a scalar value.
+        /// For example, ZKey10(1,2,3) * 4 yields ZKey10(4,8,12).
+        /// </summary>
+        /// <param name="x">The Morton key.</param>
+        /// <param name="val">The scalar multiplier.</param>
+        /// <returns>A new Morton key with each component multiplied by the scalar.</returns>
         public static ZKey10 operator *(ZKey10 x, uint val)
         {
-            // TO-DO, these needs to be replaced with a more efficient method
+            // TO-DO: Replace with a more efficient method if needed.
             var vx = x.RawValue;
-
             return new ZKey10((uint)(vx.x * val), (uint)(vx.y * val), (uint)(vx.z * val));
         }
 
-        /**
-         * Overrides - ZKey10(4,5,6) - ZKey10(1,2,3) = ZKey10(3,3,3)
-         */
+        /// <summary>
+        /// Subtracts two Morton keys component-wise.
+        /// For example, ZKey10(4,5,6) - ZKey10(1,2,3) yields ZKey10(3,3,3).
+        /// </summary>
+        /// <param name="x">The minuend Morton key.</param>
+        /// <param name="y">The subtrahend Morton key.</param>
+        /// <returns>The component-wise difference as a new Morton key.</returns>
         public static ZKey10 operator -(ZKey10 x, ZKey10 y)
         {
-            uint sum_x = (x.zKey & ZKey10Util.X_MASK) - (y.zKey & ZKey10Util.X_MASK);
-            uint sum_y = (x.zKey & ZKey10Util.Y_MASK) - (y.zKey & ZKey10Util.Y_MASK);
-            uint sum_z = (x.zKey & ZKey10Util.Z_MASK) - (y.zKey & ZKey10Util.Z_MASK);
-
-            return new ZKey10((sum_x & ZKey10Util.X_MASK) | (sum_y & ZKey10Util.Y_MASK) | (sum_z & ZKey10Util.Z_MASK));
+            uint diffX = (x.zKey & ZKey10Util.X_MASK) - (y.zKey & ZKey10Util.X_MASK);
+            uint diffY = (x.zKey & ZKey10Util.Y_MASK) - (y.zKey & ZKey10Util.Y_MASK);
+            uint diffZ = (x.zKey & ZKey10Util.Z_MASK) - (y.zKey & ZKey10Util.Z_MASK);
+            return new ZKey10((diffX & ZKey10Util.X_MASK) | (diffY & ZKey10Util.Y_MASK) | (diffZ & ZKey10Util.Z_MASK));
         }
 
-        public bool Equals(ZKey10 other)
-        {
-            return zKey == other.zKey;
-        }
+        /// <summary>
+        /// Determines whether this Morton key is equal to another.
+        /// </summary>
+        public bool Equals(ZKey10 other) => zKey == other.zKey;
 
-        public bool Equals(uint other)
-        {
-            return zKey == other;
-        }
+        /// <summary>
+        /// Determines whether this Morton key is equal to a given uint value.
+        /// </summary>
+        public bool Equals(uint other) => zKey == other;
 
-        public bool Equals((uint x, uint y, uint z) other)
-        {
-            return zKey == ZKey10Util.Encode(other.x, other.y, other.z);
-        }
+        /// <summary>
+        /// Determines whether this Morton key is equal to the given (x, y, z) tuple.
+        /// </summary>
+        public bool Equals((uint x, uint y, uint z) other) =>
+            zKey == ZKey10Util.Encode(other.x, other.y, other.z);
 
-        public ZKey10 Copy()
-        {
-            return new ZKey10(key);
-        }
+        /// <summary>
+        /// Returns a copy of this Morton key.
+        /// </summary>
+        public ZKey10 Copy() => new ZKey10(key);
     }
 }

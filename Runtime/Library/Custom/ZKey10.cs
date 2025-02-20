@@ -21,7 +21,7 @@ namespace BitCore
     /// In debug builds, input validation is performed; these checks are omitted in production.
     /// </para>
     /// </summary>
-    public struct ZKey10 : IEquatable<ZKey10>, IEquatable<uint>, IEquatable<(uint x, uint y, uint z)>
+    public readonly struct ZKey10 : IEquatable<ZKey10>, IEquatable<uint>, IEquatable<(uint x, uint y, uint z)>
     {
         private readonly uint zKey;
 
@@ -132,8 +132,10 @@ namespace BitCore
         public ZKey10 IncXY()
         {
             uint key = zKey;
+
             key = ZKey10Util.IncX(key);
             key = ZKey10Util.IncY(key);
+
             return new ZKey10(key);
         }
 
@@ -143,8 +145,10 @@ namespace BitCore
         public ZKey10 IncXZ()
         {
             uint key = zKey;
+
             key = ZKey10Util.IncX(key);
             key = ZKey10Util.IncZ(key);
+
             return new ZKey10(key);
         }
 
@@ -154,8 +158,10 @@ namespace BitCore
         public ZKey10 IncYZ()
         {
             uint key = zKey;
+
             key = ZKey10Util.IncY(key);
             key = ZKey10Util.IncZ(key);
+
             return new ZKey10(key);
         }
 
@@ -165,9 +171,11 @@ namespace BitCore
         public ZKey10 IncXYZ()
         {
             uint key = zKey;
+
             key = ZKey10Util.IncX(key);
             key = ZKey10Util.IncY(key);
             key = ZKey10Util.IncZ(key);
+
             return new ZKey10(key);
         }
 
@@ -192,8 +200,10 @@ namespace BitCore
         public ZKey10 DecXY()
         {
             uint key = zKey;
+
             key = ZKey10Util.DecX(key);
             key = ZKey10Util.DecY(key);
+
             return new ZKey10(key);
         }
 
@@ -203,8 +213,10 @@ namespace BitCore
         public ZKey10 DecXZ()
         {
             uint key = zKey;
+
             key = ZKey10Util.DecX(key);
             key = ZKey10Util.DecZ(key);
+
             return new ZKey10(key);
         }
 
@@ -214,8 +226,10 @@ namespace BitCore
         public ZKey10 DecYZ()
         {
             uint key = zKey;
+
             key = ZKey10Util.DecY(key);
             key = ZKey10Util.DecZ(key);
+
             return new ZKey10(key);
         }
 
@@ -271,6 +285,7 @@ namespace BitCore
             // TO-DO: Replace with a more efficient method if needed.
             var vx = x.RawValue;
             var vy = y.RawValue;
+
             return new ZKey10((uint)(vx.x * vy.x), (uint)(vx.y * vy.y), (uint)(vx.z * vy.z));
         }
 
@@ -300,6 +315,7 @@ namespace BitCore
             uint diffX = (x.zKey & ZKey10Util.X_MASK) - (y.zKey & ZKey10Util.X_MASK);
             uint diffY = (x.zKey & ZKey10Util.Y_MASK) - (y.zKey & ZKey10Util.Y_MASK);
             uint diffZ = (x.zKey & ZKey10Util.Z_MASK) - (y.zKey & ZKey10Util.Z_MASK);
+
             return new ZKey10((diffX & ZKey10Util.X_MASK) | (diffY & ZKey10Util.Y_MASK) | (diffZ & ZKey10Util.Z_MASK));
         }
 
@@ -323,5 +339,30 @@ namespace BitCore
         /// Returns a copy of this Morton key.
         /// </summary>
         public ZKey10 Copy() => new ZKey10(key);
+
+        public static explicit operator uint(ZKey10 key)
+        {
+            return key.zKey;
+        }
+
+        public static explicit operator ZKey10(uint key)
+        {
+            return new ZKey10(key);
+        }
+
+        public static explicit operator ZKey10(int key)
+        {
+            return new ZKey10(key);
+        }
+
+        public static explicit operator ZKey10((uint, uint, uint) tuple)
+        {
+            return new ZKey10(tuple.Item1, tuple.Item2, tuple.Item3);
+        }
+
+        public static explicit operator (uint, uint, uint)(ZKey10 key)
+        {
+            return key.RawValue;
+        }
     }
 }

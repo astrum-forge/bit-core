@@ -1,0 +1,359 @@
+using BitCore;
+using NUnit.Framework;
+using UnityEngine;
+
+/// <summary>
+/// Unit tests for verifying the functionality of the ZKey10 struct.
+/// These tests ensure that encoding, decoding, and arithmetic operations on Morton keys work as expected.
+/// </summary>
+public static class ZKey10Tests
+{
+    [Test]
+    public static void Test_ZKeyEncodeZero()
+    {
+        var test = (0u, 0u, 0u);
+        ZKey10 zkey = new ZKey10(test);
+        Assert.AreEqual(0u, zkey.key, $"Expected {test} to encode to key 0, but got {zkey.key}.");
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecode()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    ZKey10 zkey = new ZKey10(test);
+                    var decode = zkey.RawValue;
+                    Assert.AreEqual(test, decode, $"Expected {test} to decode to {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeIncX()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x + 1, y, z);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.IncX();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after IncX on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeIncXY()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x + 1, y + 1, z);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.IncXY();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after IncXY on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeIncXZ()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x + 1, y, z + 1);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.IncXZ();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after IncXZ on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeIncYZ()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x, y + 1, z + 1);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.IncYZ();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after IncYZ on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeIncXYZ()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x + 1, y + 1, z + 1);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.IncXYZ();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after IncXYZ on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeDecX()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x - 1, y, z);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.DecX();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after DecX on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeDecY()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x, y - 1, z);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.DecY();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after DecY on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeDecZ()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x, y, z - 1);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.DecZ();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after DecZ on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeDecXY()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x - 1, y - 1, z);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.DecXY();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after DecXY on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeDecXZ()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x - 1, y, z - 1);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.DecXZ();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after DecXZ on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeDecYZ()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x, y - 1, z - 1);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.DecYZ();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after DecYZ on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyEncodeDecodeDecXYZ()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var test = (x, y, z);
+                    var expected = (x - 1, y - 1, z - 1);
+                    ZKey10 zkey = new ZKey10(test);
+                    ZKey10 testKey = zkey.DecXYZ();
+                    var decode = testKey.RawValue;
+                    Assert.AreEqual(expected, decode, $"Expected {expected} after DecXYZ on {test}, but got {decode}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyAdd()
+    {
+        for (uint x = 4; x < 9; x++)
+        {
+            for (uint y = 3; y < 10; y++)
+            {
+                for (uint z = 2; z < 11; z++)
+                {
+                    var a = (z, y, z);
+                    var b = (x, z, y);
+                    ZKey10 keyA = new ZKey10(a);
+                    ZKey10 keyB = new ZKey10(b);
+                    ZKey10 sum = keyA + keyB;
+                    var expected = (a.Item1 + b.Item1, a.Item2 + b.Item2, a.Item3 + b.Item3);
+                    Assert.AreEqual(expected, sum.RawValue, $"Expected {expected} for addition, but got {sum.RawValue}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeySub()
+    {
+        for (uint x = 4; x < 6; x++)
+        {
+            for (uint y = 8; y < 10; y++)
+            {
+                for (uint z = 12; z < 16; z++)
+                {
+                    var a = (z, y, z);
+                    var b = (x, x, y);
+                    ZKey10 keyA = new ZKey10(a);
+                    ZKey10 keyB = new ZKey10(b);
+                    ZKey10 diff = keyA - keyB;
+                    var expected = (a.Item1 - b.Item1, a.Item2 - b.Item2, a.Item3 - b.Item3);
+                    Assert.AreEqual(expected, diff.RawValue, $"Expected {expected} for subtraction, but got {diff.RawValue}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyMul()
+    {
+        for (uint x = 4; x < 6; x++)
+        {
+            for (uint y = 8; y < 10; y++)
+            {
+                for (uint z = 12; z < 16; z++)
+                {
+                    var a = (z, y, z);
+                    var b = (x, x, y);
+                    ZKey10 keyA = new ZKey10(a);
+                    ZKey10 keyB = new ZKey10(b);
+                    ZKey10 product = keyA * keyB;
+                    var expected = (a.Item1 * b.Item1, a.Item2 * b.Item2, a.Item3 * b.Item3);
+                    Assert.AreEqual(expected, product.RawValue, $"Expected {expected} for multiplication, but got {product.RawValue}.");
+                }
+            }
+        }
+    }
+
+    [Test]
+    public static void Test_ZKeyMulVal()
+    {
+        for (uint x = 4; x < 6; x++)
+        {
+            for (uint y = 8; y < 10; y++)
+            {
+                for (uint z = 12; z < 16; z++)
+                {
+                    var a = (z, y, z);
+                    ZKey10 keyA = new ZKey10(a);
+                    uint scalar = 5;
+                    ZKey10 product = keyA * scalar;
+                    var expected = (a.Item1 * scalar, a.Item2 * scalar, a.Item3 * scalar);
+                    Assert.AreEqual(expected, product.RawValue, $"Expected {expected} for scalar multiplication, but got {product.RawValue}.");
+                }
+            }
+        }
+    }
+}

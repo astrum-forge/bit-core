@@ -66,6 +66,19 @@ namespace BitCore
             zKey = ZKey10Util.Encode(x, y, z);
         }
 
+        public ZKey10((uint x, uint y, uint z) tuple)
+        {
+#if BITCORE_DEBUG
+            if (tuple.x > 1023)
+                BitDebug.Throw($"ZKey10(uint, uint, uint) - x component must be between 0-1023 (10 bits), was {tuple.x}");
+            if (tuple.y > 1023)
+                BitDebug.Throw($"ZKey10(uint, uint, uint) - y component must be between 0-1023 (10 bits), was {tuple.y}");
+            if (tuple.z > 1023)
+                BitDebug.Throw($"ZKey10(uint, uint, uint) - z component must be between 0-1023 (10 bits), was {tuple.z}");
+#endif
+            zKey = ZKey10Util.Encode(tuple.x, tuple.y, tuple.z);
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ZKey10"/> struct from separate x, y, and z components.
         /// Each component must be between 0 and 1023 (10 bits).
@@ -84,6 +97,19 @@ namespace BitCore
                 BitDebug.Throw($"ZKey10(int, int, int) - z component must be between 0-1023 (10 bits), was {z}");
 #endif
             zKey = ZKey10Util.Encode((uint)x, (uint)y, (uint)z);
+        }
+
+        public ZKey10((int x, int y, int z) tuple)
+        {
+#if BITCORE_DEBUG
+            if (tuple.x < 0 || tuple.x > 1023)
+                BitDebug.Throw($"ZKey10(int, int, int) - x component must be between 0-1023 (10 bits), was {tuple.x}");
+            if (tuple.y < 0 || tuple.y > 1023)
+                BitDebug.Throw($"ZKey10(int, int, int) - y component must be between 0-1023 (10 bits), was {tuple.y}");
+            if (tuple.z < 0 || tuple.z > 1023)
+                BitDebug.Throw($"ZKey10(int, int, int) - z component must be between 0-1023 (10 bits), was {tuple.z}");
+#endif
+            zKey = ZKey10Util.Encode((uint)tuple.x, (uint)tuple.y, (uint)tuple.z);
         }
 
         /// <summary>

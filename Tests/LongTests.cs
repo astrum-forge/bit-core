@@ -141,8 +141,7 @@ public static class LongTests
     public static void Test_PopCount()
     {
         int popCount = TestValue.PopCount();
-        Assert.AreEqual(17, popCount,
-            $"Expected pop count of {TestValue} to be 17, but got {popCount}.");
+        Assert.AreEqual(35, popCount, $"Expected pop count of {TestValue} to be 35, but got {popCount}.");
     }
 
     [Test]

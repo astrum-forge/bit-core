@@ -7,6 +7,7 @@
 #endif
 
 using System;
+
 #if BITCORE_METHOD_INLINE
 using System.Runtime.CompilerServices;
 #endif
@@ -14,381 +15,192 @@ using System.Runtime.CompilerServices;
 namespace BitCore
 {
     /// <summary>
-    /// Provides a simplified representation of a 3-component Morton key.
-    /// This struct encapsulates a single 32‑bit unsigned integer (zKey) that interleaves 10 bits each for x, y, and z.
-    /// Morton keys are useful for spatial hashing and data structures with good cache locality.
-    /// <para>
-    /// In debug builds, input validation is performed; these checks are omitted in production.
-    /// </para>
+    /// Represents a 3D Morton key (Z-order curve) using a 32-bit unsigned integer,
+    /// with 10 bits per component (x, y, z), allowing values from 0 to 1023.
+    /// Provides efficient spatial hashing for data structures with improved cache locality.
     /// </summary>
+    [Serializable] // Unity serialization support
     public readonly struct ZKey10 : IEquatable<ZKey10>, IEquatable<uint>, IEquatable<(uint x, uint y, uint z)>
     {
-        private readonly uint zKey;
+        private readonly uint _zKey;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ZKey10"/> struct with the given Morton key.
+        /// Initializes a new instance with a precomputed Morton key.
         /// </summary>
-        /// <param name="zKey">The Morton key as a 32‑bit unsigned integer.</param>
-        public ZKey10(uint zKey) => this.zKey = zKey;
+        /// <param name="zKey">The Morton key as a 32-bit unsigned integer.</param>
+        public ZKey10(uint zKey) => _zKey = zKey;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ZKey10"/> struct from a positive integer key.
+        /// Initializes a new instance from a positive integer key.
         /// </summary>
         /// <param name="zKey">The Morton key as a positive integer.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown in debug mode if zKey is negative.</exception>
         public ZKey10(int zKey)
         {
 #if BITCORE_DEBUG
-            if (zKey < 0)
-            {
-                BitDebug.Throw("ZKey10(int) - Morton key must be positive");
-            }
+            if (zKey < 0) throw new ArgumentOutOfRangeException(nameof(zKey), "Morton key must be positive.");
 #endif
-            this.zKey = (uint)zKey;
+            _zKey = (uint)zKey;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ZKey10"/> struct from separate x, y, and z components.
-        /// Each component must be between 0 and 1023 (10 bits).
+        /// Initializes a new instance from x, y, z components (uint).
         /// </summary>
-        /// <param name="x">The x component.</param>
-        /// <param name="y">The y component.</param>
-        /// <param name="z">The z component.</param>
+        /// <param name="x">X component (0-1023).</param>
+        /// <param name="y">Y component (0-1023).</param>
+        /// <param name="z">Z component (0-1023).</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown in debug mode if any component exceeds 1023.</exception>
         public ZKey10(uint x, uint y, uint z)
         {
 #if BITCORE_DEBUG
-            if (x > 1023)
-                BitDebug.Throw($"ZKey10(uint, uint, uint) - x component must be between 0-1023 (10 bits), was {x}");
-            if (y > 1023)
-                BitDebug.Throw($"ZKey10(uint, uint, uint) - y component must be between 0-1023 (10 bits), was {y}");
-            if (z > 1023)
-                BitDebug.Throw($"ZKey10(uint, uint, uint) - z component must be between 0-1023 (10 bits), was {z}");
+            ValidateComponent(x, nameof(x));
+            ValidateComponent(y, nameof(y));
+            ValidateComponent(z, nameof(z));
 #endif
-            zKey = ZKey10Util.Encode(x, y, z);
+            _zKey = ZKey10Util.Encode(x, y, z);
         }
 
-        public ZKey10((uint x, uint y, uint z) tuple)
-        {
-#if BITCORE_DEBUG
-            if (tuple.x > 1023)
-                BitDebug.Throw($"ZKey10(uint, uint, uint) - x component must be between 0-1023 (10 bits), was {tuple.x}");
-            if (tuple.y > 1023)
-                BitDebug.Throw($"ZKey10(uint, uint, uint) - y component must be between 0-1023 (10 bits), was {tuple.y}");
-            if (tuple.z > 1023)
-                BitDebug.Throw($"ZKey10(uint, uint, uint) - z component must be between 0-1023 (10 bits), was {tuple.z}");
-#endif
-            zKey = ZKey10Util.Encode(tuple.x, tuple.y, tuple.z);
-        }
+        // Constructor from uint tuple
+        public ZKey10((uint x, uint y, uint z) tuple) : this(tuple.x, tuple.y, tuple.z) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ZKey10"/> struct from separate x, y, and z components.
-        /// Each component must be between 0 and 1023 (10 bits).
+        /// Initializes a new instance from x, y, z components (int).
         /// </summary>
-        /// <param name="x">The x component.</param>
-        /// <param name="y">The y component.</param>
-        /// <param name="z">The z component.</param>
+        /// <param name="x">X component (0-1023).</param>
+        /// <param name="y">Y component (0-1023).</param>
+        /// <param name="z">Z component (0-1023).</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown in debug mode if any component is out of range.</exception>
         public ZKey10(int x, int y, int z)
         {
 #if BITCORE_DEBUG
-            if (x < 0 || x > 1023)
-                BitDebug.Throw($"ZKey10(int, int, int) - x component must be between 0-1023 (10 bits), was {x}");
-            if (y < 0 || y > 1023)
-                BitDebug.Throw($"ZKey10(int, int, int) - y component must be between 0-1023 (10 bits), was {y}");
-            if (z < 0 || z > 1023)
-                BitDebug.Throw($"ZKey10(int, int, int) - z component must be between 0-1023 (10 bits), was {z}");
+            ValidateComponent(x, nameof(x));
+            ValidateComponent(y, nameof(y));
+            ValidateComponent(z, nameof(z));
 #endif
-            zKey = ZKey10Util.Encode((uint)x, (uint)y, (uint)z);
+            _zKey = ZKey10Util.Encode((uint)x, (uint)y, (uint)z);
         }
 
-        public ZKey10((int x, int y, int z) tuple)
-        {
+        // Constructor from int tuple
+        public ZKey10((int x, int y, int z) tuple) : this(tuple.x, tuple.y, tuple.z) { }
+
 #if BITCORE_DEBUG
-            if (tuple.x < 0 || tuple.x > 1023)
-                BitDebug.Throw($"ZKey10(int, int, int) - x component must be between 0-1023 (10 bits), was {tuple.x}");
-            if (tuple.y < 0 || tuple.y > 1023)
-                BitDebug.Throw($"ZKey10(int, int, int) - y component must be between 0-1023 (10 bits), was {tuple.y}");
-            if (tuple.z < 0 || tuple.z > 1023)
-                BitDebug.Throw($"ZKey10(int, int, int) - z component must be between 0-1023 (10 bits), was {tuple.z}");
+        private static void ValidateComponent(int value, string paramName)
+        {
+            if (value < 0 || value > 1023)
+                throw new ArgumentOutOfRangeException(paramName, $"Component must be between 0-1023, was {value}.");
+        }
+
+        private static void ValidateComponent(uint value, string paramName)
+        {
+            if (value > 1023)
+                throw new ArgumentOutOfRangeException(paramName, $"Component must be between 0-1023, was {value}.");
+        }
 #endif
-            zKey = ZKey10Util.Encode((uint)tuple.x, (uint)tuple.y, (uint)tuple.z);
-        }
 
         /// <summary>
-        /// Gets the raw Morton key.
+        /// Gets the raw Morton key value.
         /// </summary>
-        public uint key => zKey;
+        public uint Key => _zKey;
 
         /// <summary>
-        /// Gets the x component of the Morton key.
+        /// Gets the decoded x component.
         /// </summary>
-        public uint x => ZKey10Util.DecodePart(zKey);
+        public uint X => ZKey10Util.DecodePart(_zKey);
 
         /// <summary>
-        /// Gets the y component of the Morton key.
+        /// Gets the decoded y component.
         /// </summary>
-        public uint y => ZKey10Util.DecodePart(zKey >> 1);
+        public uint Y => ZKey10Util.DecodePart(_zKey >> 1);
 
         /// <summary>
-        /// Gets the z component of the Morton key.
+        /// Gets the decoded z component.
         /// </summary>
-        public uint z => ZKey10Util.DecodePart(zKey >> 2);
+        public uint Z => ZKey10Util.DecodePart(_zKey >> 2);
 
         /// <summary>
-        /// Gets the raw (x, y, z) components of the Morton key.
+        /// Gets all decoded components as a tuple.
         /// </summary>
-        public (uint x, uint y, uint z) RawValue => ZKey10Util.Decode(zKey);
+        public (uint x, uint y, uint z) Components => ZKey10Util.Decode(_zKey);
+
+        // Increment methods
+        public ZKey10 IncrementX() => new ZKey10(ZKey10Util.IncX(_zKey));
+        public ZKey10 IncrementY() => new ZKey10(ZKey10Util.IncY(_zKey));
+        public ZKey10 IncrementZ() => new ZKey10(ZKey10Util.IncZ(_zKey));
+        public ZKey10 IncrementXY() => IncrementX().IncrementY();
+        public ZKey10 IncrementXZ() => IncrementX().IncrementZ();
+        public ZKey10 IncrementYZ() => IncrementY().IncrementZ();
+        public ZKey10 IncrementXYZ() => IncrementX().IncrementY().IncrementZ();
+
+        // Decrement methods
+        public ZKey10 DecrementX() => new ZKey10(ZKey10Util.DecX(_zKey));
+        public ZKey10 DecrementY() => new ZKey10(ZKey10Util.DecY(_zKey));
+        public ZKey10 DecrementZ() => new ZKey10(ZKey10Util.DecZ(_zKey));
+        public ZKey10 DecrementXY() => DecrementX().DecrementY();
+        public ZKey10 DecrementXZ() => DecrementX().DecrementZ();
+        public ZKey10 DecrementYZ() => DecrementY().DecrementZ();
+        public ZKey10 DecrementXYZ() => DecrementX().DecrementY().DecrementZ();
 
         /// <summary>
-        /// Increments the x component of the Morton key by one unit.
+        /// Applies modulo operation to the raw key.
         /// </summary>
-        public ZKey10 IncX() => new ZKey10(ZKey10Util.IncX(zKey));
+        public ZKey10 Modulo(uint modulo) => new ZKey10(_zKey % modulo);
 
         /// <summary>
-        /// Increments the y component of the Morton key by one unit.
+        /// Applies bitwise AND mask to the raw key.
         /// </summary>
-        public ZKey10 IncY() => new ZKey10(ZKey10Util.IncY(zKey));
+        public ZKey10 Mask(uint mask) => new ZKey10(_zKey & mask);
 
-        /// <summary>
-        /// Increments the z component of the Morton key by one unit.
-        /// </summary>
-        public ZKey10 IncZ() => new ZKey10(ZKey10Util.IncZ(zKey));
-
-        /// <summary>
-        /// Increments the x and y components of the Morton key by one unit each.
-        /// </summary>
-        public ZKey10 IncXY()
+        // Operator overloads
+        public static ZKey10 operator +(ZKey10 a, ZKey10 b)
         {
-            uint key = zKey;
-
-            key = ZKey10Util.IncX(key);
-            key = ZKey10Util.IncY(key);
-
-            return new ZKey10(key);
-        }
-
-        /// <summary>
-        /// Increments the x and z components of the Morton key by one unit each.
-        /// </summary>
-        public ZKey10 IncXZ()
-        {
-            uint key = zKey;
-
-            key = ZKey10Util.IncX(key);
-            key = ZKey10Util.IncZ(key);
-
-            return new ZKey10(key);
-        }
-
-        /// <summary>
-        /// Increments the y and z components of the Morton key by one unit each.
-        /// </summary>
-        public ZKey10 IncYZ()
-        {
-            uint key = zKey;
-
-            key = ZKey10Util.IncY(key);
-            key = ZKey10Util.IncZ(key);
-
-            return new ZKey10(key);
-        }
-
-        /// <summary>
-        /// Increments all three components (x, y, and z) of the Morton key by one unit.
-        /// </summary>
-        public ZKey10 IncXYZ()
-        {
-            uint key = zKey;
-
-            key = ZKey10Util.IncX(key);
-            key = ZKey10Util.IncY(key);
-            key = ZKey10Util.IncZ(key);
-
-            return new ZKey10(key);
-        }
-
-        /// <summary>
-        /// Decrements the x component of the Morton key by one unit.
-        /// </summary>
-        public ZKey10 DecX() => new ZKey10(ZKey10Util.DecX(zKey));
-
-        /// <summary>
-        /// Decrements the y component of the Morton key by one unit.
-        /// </summary>
-        public ZKey10 DecY() => new ZKey10(ZKey10Util.DecY(zKey));
-
-        /// <summary>
-        /// Decrements the z component of the Morton key by one unit.
-        /// </summary>
-        public ZKey10 DecZ() => new ZKey10(ZKey10Util.DecZ(zKey));
-
-        /// <summary>
-        /// Decrements the x and y components of the Morton key by one unit each.
-        /// </summary>
-        public ZKey10 DecXY()
-        {
-            uint key = zKey;
-
-            key = ZKey10Util.DecX(key);
-            key = ZKey10Util.DecY(key);
-
-            return new ZKey10(key);
-        }
-
-        /// <summary>
-        /// Decrements the x and z components of the Morton key by one unit each.
-        /// </summary>
-        public ZKey10 DecXZ()
-        {
-            uint key = zKey;
-
-            key = ZKey10Util.DecX(key);
-            key = ZKey10Util.DecZ(key);
-
-            return new ZKey10(key);
-        }
-
-        /// <summary>
-        /// Decrements the y and z components of the Morton key by one unit each.
-        /// </summary>
-        public ZKey10 DecYZ()
-        {
-            uint key = zKey;
-
-            key = ZKey10Util.DecY(key);
-            key = ZKey10Util.DecZ(key);
-
-            return new ZKey10(key);
-        }
-
-        /// <summary>
-        /// Decrements all three components (x, y, and z) of the Morton key by one unit.
-        /// </summary>
-        public ZKey10 DecXYZ()
-        {
-            uint key = zKey;
-            key = ZKey10Util.DecX(key);
-            key = ZKey10Util.DecY(key);
-            key = ZKey10Util.DecZ(key);
-            return new ZKey10(key);
-        }
-
-        /// <summary>
-        /// Returns a new Morton key with the key value modulo the specified value.
-        /// </summary>
-        /// <param name="modulo">The modulo value.</param>
-        public ZKey10 Mod(uint modulo) => new ZKey10(zKey % modulo);
-
-        /// <summary>
-        /// Returns a new Morton key with the key value masked by the specified mask.
-        /// </summary>
-        /// <param name="mask">The mask to apply.</param>
-        public ZKey10 Mask(uint mask) => new ZKey10(zKey & mask);
-
-        /// <summary>
-        /// Adds two Morton keys component-wise.
-        /// For example, ZKey10(1,2,3) + ZKey10(4,5,6) yields ZKey10(5,7,9).
-        /// </summary>
-        /// <param name="x">The first Morton key.</param>
-        /// <param name="y">The second Morton key.</param>
-        /// <returns>The component-wise sum as a new Morton key.</returns>
-        public static ZKey10 operator +(ZKey10 x, ZKey10 y)
-        {
-            uint sumX = (x.zKey | ZKey10Util.YZ_MASK) + (y.zKey & ZKey10Util.X_MASK);
-            uint sumY = (x.zKey | ZKey10Util.XZ_MASK) + (y.zKey & ZKey10Util.Y_MASK);
-            uint sumZ = (x.zKey | ZKey10Util.XY_MASK) + (y.zKey & ZKey10Util.Z_MASK);
+            uint sumX = (a._zKey | ZKey10Util.YZ_MASK) + (b._zKey & ZKey10Util.X_MASK);
+            uint sumY = (a._zKey | ZKey10Util.XZ_MASK) + (b._zKey & ZKey10Util.Y_MASK);
+            uint sumZ = (a._zKey | ZKey10Util.XY_MASK) + (b._zKey & ZKey10Util.Z_MASK);
 
             return new ZKey10((sumX & ZKey10Util.X_MASK) | (sumY & ZKey10Util.Y_MASK) | (sumZ & ZKey10Util.Z_MASK));
         }
 
-        /// <summary>
-        /// Multiplies two Morton keys component-wise.
-        /// For example, ZKey10(1,2,3) * ZKey10(4,5,6) yields ZKey10(4,10,18).
-        /// </summary>
-        /// <param name="x">The first Morton key.</param>
-        /// <param name="y">The second Morton key.</param>
-        /// <returns>The component-wise product as a new Morton key.</returns>
-        public static ZKey10 operator *(ZKey10 x, ZKey10 y)
+        public static ZKey10 operator -(ZKey10 a, ZKey10 b)
         {
-            // TO-DO: Replace with a more efficient method if needed.
-            var vx = x.RawValue;
-            var vy = y.RawValue;
-
-            return new ZKey10((uint)(vx.x * vy.x), (uint)(vx.y * vy.y), (uint)(vx.z * vy.z));
-        }
-
-        /// <summary>
-        /// Multiplies each component of the Morton key by a scalar value.
-        /// For example, ZKey10(1,2,3) * 4 yields ZKey10(4,8,12).
-        /// </summary>
-        /// <param name="x">The Morton key.</param>
-        /// <param name="val">The scalar multiplier.</param>
-        /// <returns>A new Morton key with each component multiplied by the scalar.</returns>
-        public static ZKey10 operator *(ZKey10 x, uint val)
-        {
-            // TO-DO: Replace with a more efficient method if needed.
-            var vx = x.RawValue;
-            return new ZKey10((uint)(vx.x * val), (uint)(vx.y * val), (uint)(vx.z * val));
-        }
-
-        /// <summary>
-        /// Subtracts two Morton keys component-wise.
-        /// For example, ZKey10(4,5,6) - ZKey10(1,2,3) yields ZKey10(3,3,3).
-        /// </summary>
-        /// <param name="x">The minuend Morton key.</param>
-        /// <param name="y">The subtrahend Morton key.</param>
-        /// <returns>The component-wise difference as a new Morton key.</returns>
-        public static ZKey10 operator -(ZKey10 x, ZKey10 y)
-        {
-            uint diffX = (x.zKey & ZKey10Util.X_MASK) - (y.zKey & ZKey10Util.X_MASK);
-            uint diffY = (x.zKey & ZKey10Util.Y_MASK) - (y.zKey & ZKey10Util.Y_MASK);
-            uint diffZ = (x.zKey & ZKey10Util.Z_MASK) - (y.zKey & ZKey10Util.Z_MASK);
+            uint diffX = (a._zKey & ZKey10Util.X_MASK) - (b._zKey & ZKey10Util.X_MASK);
+            uint diffY = (a._zKey & ZKey10Util.Y_MASK) - (b._zKey & ZKey10Util.Y_MASK);
+            uint diffZ = (a._zKey & ZKey10Util.Z_MASK) - (b._zKey & ZKey10Util.Z_MASK);
 
             return new ZKey10((diffX & ZKey10Util.X_MASK) | (diffY & ZKey10Util.Y_MASK) | (diffZ & ZKey10Util.Z_MASK));
         }
 
+        public static ZKey10 operator *(ZKey10 a, ZKey10 b)
+        {
+            var (ax, ay, az) = a.Components;
+            var (bx, by, bz) = b.Components;
+
+            return new ZKey10(ax * bx, ay * by, az * bz);
+        }
+
+        public static ZKey10 operator *(ZKey10 a, uint scalar)
+        {
+            var (x, y, z) = a.Components;
+
+            return new ZKey10(x * scalar, y * scalar, z * scalar);
+        }
+
+        // Equality implementations
+        public bool Equals(ZKey10 other) => _zKey == other._zKey;
+        public bool Equals(uint other) => _zKey == other;
+        public bool Equals((uint x, uint y, uint z) other) => _zKey == ZKey10Util.Encode(other.x, other.y, other.z);
+        public override bool Equals(object obj) => obj is ZKey10 other && Equals(other);
+        public override int GetHashCode() => _zKey.GetHashCode();
+
+        // Explicit conversions
+        public static explicit operator uint(ZKey10 key) => key._zKey;
+        public static explicit operator ZKey10(uint key) => new ZKey10(key);
+        public static explicit operator ZKey10(int key) => new ZKey10(key);
+        public static explicit operator ZKey10((uint, uint, uint) tuple) => new ZKey10(tuple);
+        public static explicit operator (uint, uint, uint)(ZKey10 key) => key.Components;
+
         /// <summary>
-        /// Determines whether this Morton key is equal to another.
+        /// Creates a copy of this Morton key.
         /// </summary>
-        public bool Equals(ZKey10 other) => zKey == other.zKey;
-
-        /// <summary>
-        /// Determines whether this Morton key is equal to a given uint value.
-        /// </summary>
-        public bool Equals(uint other) => zKey == other;
-
-        /// <summary>
-        /// Determines whether this Morton key is equal to the given (x, y, z) tuple.
-        /// </summary>
-        public bool Equals((uint x, uint y, uint z) other) =>
-            zKey == ZKey10Util.Encode(other.x, other.y, other.z);
-
-        /// <summary>
-        /// Returns a copy of this Morton key.
-        /// </summary>
-        public ZKey10 Copy() => new ZKey10(key);
-
-        public static explicit operator uint(ZKey10 key)
-        {
-            return key.zKey;
-        }
-
-        public static explicit operator ZKey10(uint key)
-        {
-            return new ZKey10(key);
-        }
-
-        public static explicit operator ZKey10(int key)
-        {
-            return new ZKey10(key);
-        }
-
-        public static explicit operator ZKey10((uint, uint, uint) tuple)
-        {
-            return new ZKey10(tuple.Item1, tuple.Item2, tuple.Item3);
-        }
-
-        public static explicit operator (uint, uint, uint)(ZKey10 key)
-        {
-            return key.RawValue;
-        }
+        public ZKey10 Copy() => new ZKey10(_zKey);
     }
 }

@@ -58,39 +58,39 @@ public static class ByteTests
 	}
 
 	[Test]
-	public static void Test_UnsetBitAt()
+	public static void Test_ClearBitAt()
 	{
 		for (int i = 0; i < LoopCount; i++)
 		{
-			byte result = TestValue.UnsetBitAt(i);
+			byte result = TestValue.ClearBitAt(i);
 			Assert.AreEqual(0, result.BitAt(i), $"After unsetting, bit at position {i} should be 0.");
 		}
 	}
 
 	[Test]
-	public static void Test_SetBit()
+	public static void Test_SetBitValueAt()
 	{
 		for (int i = 0; i < LoopCount; i++)
 		{
-			byte result0 = TestValue.SetBit(i, 0);
+			byte result0 = TestValue.SetBitValueAt(i, 0);
 			Assert.AreEqual(0, result0.BitAt(i), $"SetBit({i}, 0) should result in bit {i} being 0.");
 
-			byte result1 = TestValue.SetBit(i, 1);
+			byte result1 = TestValue.SetBitValueAt(i, 1);
 			Assert.AreEqual(1, result1.BitAt(i), $"SetBit({i}, 1) should result in bit {i} being 1.");
 		}
 	}
 
 	[Test]
-	public static void Test_SetUnsetBit()
+	public static void Test_SetUnsetBitValueAt()
 	{
 		for (int i = 0; i < LoopCount; i++)
 		{
 			// Set to 0 then to 1
-			byte result = TestValue.SetBit(i, 0).SetBit(i, 1);
+			byte result = TestValue.SetBitValueAt(i, 0).SetBitValueAt(i, 1);
 			Assert.AreEqual(1, result.BitAt(i), $"After setting to 0 then 1, bit {i} should be 1.");
 
 			// Set to 1 then to 0
-			result = TestValue.SetBit(i, 1).SetBit(i, 0);
+			result = TestValue.SetBitValueAt(i, 1).SetBitValueAt(i, 0);
 			Assert.AreEqual(0, result.BitAt(i), $"After setting to 1 then 0, bit {i} should be 0.");
 		}
 	}

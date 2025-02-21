@@ -4,7 +4,7 @@ namespace BitCore
     /// Utility class for ZKey21 Morton key operations.
     /// Provides bit manipulation methods for encoding and decoding 3D coordinates with 21 bits per component.
     /// </summary>
-    internal static class ZKey21Util
+    internal static class ZKey3D21Util
     {
         // Bit masks for isolating components (21 bits each, interleaved)
         public static readonly ulong X_MASK = 0x1249249249249249; // Bits for x: 1, 4, 7, ..., 61

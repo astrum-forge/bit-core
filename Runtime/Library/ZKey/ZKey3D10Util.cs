@@ -4,7 +4,7 @@ namespace BitCore
     /// Utility class for ZKey10 Morton key operations.
     /// Provides bit manipulation methods for encoding and decoding 3D coordinates.
     /// </summary>
-    internal static class ZKey10Util
+    internal static class ZKey3D10Util
     {
         // Bit masks for isolating components (10 bits each, interleaved)
         public static readonly uint X_MASK = 0x09249249; // Bits for x: 0, 3, 6, ..., 27

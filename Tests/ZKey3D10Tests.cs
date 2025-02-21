@@ -3,16 +3,16 @@ using NUnit.Framework;
 using UnityEngine;
 
 /// <summary>
-/// Unit tests for verifying the functionality of the ZKey10 struct.
+/// Unit tests for verifying the functionality of the ZKey3D10 struct.
 /// These tests ensure that encoding, decoding, and arithmetic operations on Morton keys work as expected.
 /// </summary>
-public static class ZKey10Tests
+public static class ZKey3D10Tests
 {
     [Test]
     public static void Test_ZKeyEncodeZero()
     {
         var test = (0u, 0u, 0u);
-        ZKey10 zkey = new ZKey10(test);
+        ZKey3D10 zkey = new ZKey3D10(test);
         Assert.AreEqual(0u, zkey.Key, $"Expected {test} to encode to key 0, but got {zkey.Key}.");
     }
 
@@ -26,7 +26,7 @@ public static class ZKey10Tests
                 for (uint z = 2; z < 11; z++)
                 {
                     var test = (x, y, z);
-                    ZKey10 zkey = new ZKey10(test);
+                    ZKey3D10 zkey = new ZKey3D10(test);
                     var decode = zkey.Components;
                     Assert.AreEqual(test, decode, $"Expected {test} to decode to {decode}.");
                 }
@@ -45,8 +45,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x + 1, y, z);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.IncrementX();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.IncrementX();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after IncX on {test}, but got {decode}.");
                 }
@@ -65,8 +65,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x + 1, y + 1, z);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.IncrementXY();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.IncrementXY();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after IncXY on {test}, but got {decode}.");
                 }
@@ -85,8 +85,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x + 1, y, z + 1);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.IncrementXZ();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.IncrementXZ();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after IncXZ on {test}, but got {decode}.");
                 }
@@ -105,8 +105,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x, y + 1, z + 1);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.IncrementYZ();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.IncrementYZ();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after IncYZ on {test}, but got {decode}.");
                 }
@@ -125,8 +125,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x + 1, y + 1, z + 1);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.IncrementXYZ();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.IncrementXYZ();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after IncXYZ on {test}, but got {decode}.");
                 }
@@ -145,8 +145,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x - 1, y, z);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.DecrementX();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.DecrementX();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after DecX on {test}, but got {decode}.");
                 }
@@ -165,8 +165,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x, y - 1, z);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.DecrementY();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.DecrementY();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after DecY on {test}, but got {decode}.");
                 }
@@ -185,8 +185,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x, y, z - 1);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.DecrementZ();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.DecrementZ();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after DecZ on {test}, but got {decode}.");
                 }
@@ -205,8 +205,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x - 1, y - 1, z);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.DecrementXY();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.DecrementXY();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after DecXY on {test}, but got {decode}.");
                 }
@@ -225,8 +225,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x - 1, y, z - 1);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.DecrementXZ();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.DecrementXZ();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after DecXZ on {test}, but got {decode}.");
                 }
@@ -245,8 +245,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x, y - 1, z - 1);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.DecrementYZ();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.DecrementYZ();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after DecYZ on {test}, but got {decode}.");
                 }
@@ -265,8 +265,8 @@ public static class ZKey10Tests
                 {
                     var test = (x, y, z);
                     var expected = (x - 1, y - 1, z - 1);
-                    ZKey10 zkey = new ZKey10(test);
-                    ZKey10 testKey = zkey.DecrementXYZ();
+                    ZKey3D10 zkey = new ZKey3D10(test);
+                    ZKey3D10 testKey = zkey.DecrementXYZ();
                     var decode = testKey.Components;
                     Assert.AreEqual(expected, decode, $"Expected {expected} after DecXYZ on {test}, but got {decode}.");
                 }
@@ -285,9 +285,9 @@ public static class ZKey10Tests
                 {
                     var a = (z, y, z);
                     var b = (x, z, y);
-                    ZKey10 keyA = new ZKey10(a);
-                    ZKey10 keyB = new ZKey10(b);
-                    ZKey10 sum = keyA + keyB;
+                    ZKey3D10 keyA = new ZKey3D10(a);
+                    ZKey3D10 keyB = new ZKey3D10(b);
+                    ZKey3D10 sum = keyA + keyB;
                     var expected = (a.Item1 + b.Item1, a.Item2 + b.Item2, a.Item3 + b.Item3);
                     Assert.AreEqual(expected, sum.Components, $"Expected {expected} for addition, but got {sum.Components}.");
                 }
@@ -306,9 +306,9 @@ public static class ZKey10Tests
                 {
                     var a = (z, y, z);
                     var b = (x, x, y);
-                    ZKey10 keyA = new ZKey10(a);
-                    ZKey10 keyB = new ZKey10(b);
-                    ZKey10 diff = keyA - keyB;
+                    ZKey3D10 keyA = new ZKey3D10(a);
+                    ZKey3D10 keyB = new ZKey3D10(b);
+                    ZKey3D10 diff = keyA - keyB;
                     var expected = (a.Item1 - b.Item1, a.Item2 - b.Item2, a.Item3 - b.Item3);
                     Assert.AreEqual(expected, diff.Components, $"Expected {expected} for subtraction, but got {diff.Components}.");
                 }
@@ -327,9 +327,9 @@ public static class ZKey10Tests
                 {
                     var a = (z, y, z);
                     var b = (x, x, y);
-                    ZKey10 keyA = new ZKey10(a);
-                    ZKey10 keyB = new ZKey10(b);
-                    ZKey10 product = keyA * keyB;
+                    ZKey3D10 keyA = new ZKey3D10(a);
+                    ZKey3D10 keyB = new ZKey3D10(b);
+                    ZKey3D10 product = keyA * keyB;
                     var expected = (a.Item1 * b.Item1, a.Item2 * b.Item2, a.Item3 * b.Item3);
                     Assert.AreEqual(expected, product.Components, $"Expected {expected} for multiplication, but got {product.Components}.");
                 }
@@ -347,9 +347,9 @@ public static class ZKey10Tests
                 for (uint z = 12; z < 16; z++)
                 {
                     var a = (z, y, z);
-                    ZKey10 keyA = new ZKey10(a);
+                    ZKey3D10 keyA = new ZKey3D10(a);
                     uint scalar = 5;
-                    ZKey10 product = keyA * scalar;
+                    ZKey3D10 product = keyA * scalar;
                     var expected = (a.Item1 * scalar, a.Item2 * scalar, a.Item3 * scalar);
                     Assert.AreEqual(expected, product.Components, $"Expected {expected} for scalar multiplication, but got {product.Components}.");
                 }

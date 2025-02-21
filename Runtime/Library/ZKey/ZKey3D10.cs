@@ -20,7 +20,7 @@ namespace BitCore
     /// Provides efficient spatial hashing for data structures with improved cache locality.
     /// </summary>
     [Serializable] // Unity serialization support
-    public readonly struct ZKey10 : IEquatable<ZKey10>, IEquatable<uint>, IEquatable<(uint x, uint y, uint z)>
+    public readonly struct ZKey3D10 : IEquatable<ZKey3D10>, IEquatable<uint>, IEquatable<(uint x, uint y, uint z)>
     {
         private readonly uint _zKey;
 
@@ -28,14 +28,14 @@ namespace BitCore
         /// Initializes a new instance with a precomputed Morton key.
         /// </summary>
         /// <param name="zKey">The Morton key as a 32-bit unsigned integer.</param>
-        public ZKey10(uint zKey) => _zKey = zKey;
+        public ZKey3D10(uint zKey) => _zKey = zKey;
 
         /// <summary>
         /// Initializes a new instance from a positive integer key.
         /// </summary>
         /// <param name="zKey">The Morton key as a positive integer.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown in debug mode if zKey is negative.</exception>
-        public ZKey10(int zKey)
+        public ZKey3D10(int zKey)
         {
 #if BITCORE_DEBUG
             if (zKey < 0) throw new ArgumentOutOfRangeException(nameof(zKey), "Morton key must be positive.");
@@ -50,18 +50,18 @@ namespace BitCore
         /// <param name="y">Y component (0-1023).</param>
         /// <param name="z">Z component (0-1023).</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown in debug mode if any component exceeds 1023.</exception>
-        public ZKey10(uint x, uint y, uint z)
+        public ZKey3D10(uint x, uint y, uint z)
         {
 #if BITCORE_DEBUG
             ValidateComponent(x, nameof(x));
             ValidateComponent(y, nameof(y));
             ValidateComponent(z, nameof(z));
 #endif
-            _zKey = ZKey10Util.Encode(x, y, z);
+            _zKey = ZKey3D10Util.Encode(x, y, z);
         }
 
         // Constructor from uint tuple
-        public ZKey10((uint x, uint y, uint z) tuple) : this(tuple.x, tuple.y, tuple.z) { }
+        public ZKey3D10((uint x, uint y, uint z) tuple) : this(tuple.x, tuple.y, tuple.z) { }
 
         /// <summary>
         /// Initializes a new instance from x, y, z components (int).
@@ -70,18 +70,18 @@ namespace BitCore
         /// <param name="y">Y component (0-1023).</param>
         /// <param name="z">Z component (0-1023).</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown in debug mode if any component is out of range.</exception>
-        public ZKey10(int x, int y, int z)
+        public ZKey3D10(int x, int y, int z)
         {
 #if BITCORE_DEBUG
             ValidateComponent(x, nameof(x));
             ValidateComponent(y, nameof(y));
             ValidateComponent(z, nameof(z));
 #endif
-            _zKey = ZKey10Util.Encode((uint)x, (uint)y, (uint)z);
+            _zKey = ZKey3D10Util.Encode((uint)x, (uint)y, (uint)z);
         }
 
         // Constructor from int tuple
-        public ZKey10((int x, int y, int z) tuple) : this(tuple.x, tuple.y, tuple.z) { }
+        public ZKey3D10((int x, int y, int z) tuple) : this(tuple.x, tuple.y, tuple.z) { }
 
 #if BITCORE_DEBUG
         private static void ValidateComponent(int value, string paramName)
@@ -105,102 +105,102 @@ namespace BitCore
         /// <summary>
         /// Gets the decoded x component.
         /// </summary>
-        public uint X => ZKey10Util.DecodePart(_zKey);
+        public uint X => ZKey3D10Util.DecodePart(_zKey);
 
         /// <summary>
         /// Gets the decoded y component.
         /// </summary>
-        public uint Y => ZKey10Util.DecodePart(_zKey >> 1);
+        public uint Y => ZKey3D10Util.DecodePart(_zKey >> 1);
 
         /// <summary>
         /// Gets the decoded z component.
         /// </summary>
-        public uint Z => ZKey10Util.DecodePart(_zKey >> 2);
+        public uint Z => ZKey3D10Util.DecodePart(_zKey >> 2);
 
         /// <summary>
         /// Gets all decoded components as a tuple.
         /// </summary>
-        public (uint x, uint y, uint z) Components => ZKey10Util.Decode(_zKey);
+        public (uint x, uint y, uint z) Components => ZKey3D10Util.Decode(_zKey);
 
         // Increment methods
-        public ZKey10 IncrementX() => new ZKey10(ZKey10Util.IncX(_zKey));
-        public ZKey10 IncrementY() => new ZKey10(ZKey10Util.IncY(_zKey));
-        public ZKey10 IncrementZ() => new ZKey10(ZKey10Util.IncZ(_zKey));
-        public ZKey10 IncrementXY() => IncrementX().IncrementY();
-        public ZKey10 IncrementXZ() => IncrementX().IncrementZ();
-        public ZKey10 IncrementYZ() => IncrementY().IncrementZ();
-        public ZKey10 IncrementXYZ() => IncrementX().IncrementY().IncrementZ();
+        public ZKey3D10 IncrementX() => new ZKey3D10(ZKey3D10Util.IncX(_zKey));
+        public ZKey3D10 IncrementY() => new ZKey3D10(ZKey3D10Util.IncY(_zKey));
+        public ZKey3D10 IncrementZ() => new ZKey3D10(ZKey3D10Util.IncZ(_zKey));
+        public ZKey3D10 IncrementXY() => IncrementX().IncrementY();
+        public ZKey3D10 IncrementXZ() => IncrementX().IncrementZ();
+        public ZKey3D10 IncrementYZ() => IncrementY().IncrementZ();
+        public ZKey3D10 IncrementXYZ() => IncrementX().IncrementY().IncrementZ();
 
         // Decrement methods
-        public ZKey10 DecrementX() => new ZKey10(ZKey10Util.DecX(_zKey));
-        public ZKey10 DecrementY() => new ZKey10(ZKey10Util.DecY(_zKey));
-        public ZKey10 DecrementZ() => new ZKey10(ZKey10Util.DecZ(_zKey));
-        public ZKey10 DecrementXY() => DecrementX().DecrementY();
-        public ZKey10 DecrementXZ() => DecrementX().DecrementZ();
-        public ZKey10 DecrementYZ() => DecrementY().DecrementZ();
-        public ZKey10 DecrementXYZ() => DecrementX().DecrementY().DecrementZ();
+        public ZKey3D10 DecrementX() => new ZKey3D10(ZKey3D10Util.DecX(_zKey));
+        public ZKey3D10 DecrementY() => new ZKey3D10(ZKey3D10Util.DecY(_zKey));
+        public ZKey3D10 DecrementZ() => new ZKey3D10(ZKey3D10Util.DecZ(_zKey));
+        public ZKey3D10 DecrementXY() => DecrementX().DecrementY();
+        public ZKey3D10 DecrementXZ() => DecrementX().DecrementZ();
+        public ZKey3D10 DecrementYZ() => DecrementY().DecrementZ();
+        public ZKey3D10 DecrementXYZ() => DecrementX().DecrementY().DecrementZ();
 
         /// <summary>
         /// Applies modulo operation to the raw key.
         /// </summary>
-        public ZKey10 Modulo(uint modulo) => new ZKey10(_zKey % modulo);
+        public ZKey3D10 Modulo(uint modulo) => new ZKey3D10(_zKey % modulo);
 
         /// <summary>
         /// Applies bitwise AND mask to the raw key.
         /// </summary>
-        public ZKey10 Mask(uint mask) => new ZKey10(_zKey & mask);
+        public ZKey3D10 Mask(uint mask) => new ZKey3D10(_zKey & mask);
 
         // Operator overloads
-        public static ZKey10 operator +(ZKey10 a, ZKey10 b)
+        public static ZKey3D10 operator +(ZKey3D10 a, ZKey3D10 b)
         {
-            uint sumX = (a._zKey | ZKey10Util.YZ_MASK) + (b._zKey & ZKey10Util.X_MASK);
-            uint sumY = (a._zKey | ZKey10Util.XZ_MASK) + (b._zKey & ZKey10Util.Y_MASK);
-            uint sumZ = (a._zKey | ZKey10Util.XY_MASK) + (b._zKey & ZKey10Util.Z_MASK);
+            uint sumX = (a._zKey | ZKey3D10Util.YZ_MASK) + (b._zKey & ZKey3D10Util.X_MASK);
+            uint sumY = (a._zKey | ZKey3D10Util.XZ_MASK) + (b._zKey & ZKey3D10Util.Y_MASK);
+            uint sumZ = (a._zKey | ZKey3D10Util.XY_MASK) + (b._zKey & ZKey3D10Util.Z_MASK);
 
-            return new ZKey10((sumX & ZKey10Util.X_MASK) | (sumY & ZKey10Util.Y_MASK) | (sumZ & ZKey10Util.Z_MASK));
+            return new ZKey3D10((sumX & ZKey3D10Util.X_MASK) | (sumY & ZKey3D10Util.Y_MASK) | (sumZ & ZKey3D10Util.Z_MASK));
         }
 
-        public static ZKey10 operator -(ZKey10 a, ZKey10 b)
+        public static ZKey3D10 operator -(ZKey3D10 a, ZKey3D10 b)
         {
-            uint diffX = (a._zKey & ZKey10Util.X_MASK) - (b._zKey & ZKey10Util.X_MASK);
-            uint diffY = (a._zKey & ZKey10Util.Y_MASK) - (b._zKey & ZKey10Util.Y_MASK);
-            uint diffZ = (a._zKey & ZKey10Util.Z_MASK) - (b._zKey & ZKey10Util.Z_MASK);
+            uint diffX = (a._zKey & ZKey3D10Util.X_MASK) - (b._zKey & ZKey3D10Util.X_MASK);
+            uint diffY = (a._zKey & ZKey3D10Util.Y_MASK) - (b._zKey & ZKey3D10Util.Y_MASK);
+            uint diffZ = (a._zKey & ZKey3D10Util.Z_MASK) - (b._zKey & ZKey3D10Util.Z_MASK);
 
-            return new ZKey10((diffX & ZKey10Util.X_MASK) | (diffY & ZKey10Util.Y_MASK) | (diffZ & ZKey10Util.Z_MASK));
+            return new ZKey3D10((diffX & ZKey3D10Util.X_MASK) | (diffY & ZKey3D10Util.Y_MASK) | (diffZ & ZKey3D10Util.Z_MASK));
         }
 
-        public static ZKey10 operator *(ZKey10 a, ZKey10 b)
+        public static ZKey3D10 operator *(ZKey3D10 a, ZKey3D10 b)
         {
             var (ax, ay, az) = a.Components;
             var (bx, by, bz) = b.Components;
 
-            return new ZKey10(ax * bx, ay * by, az * bz);
+            return new ZKey3D10(ax * bx, ay * by, az * bz);
         }
 
-        public static ZKey10 operator *(ZKey10 a, uint scalar)
+        public static ZKey3D10 operator *(ZKey3D10 a, uint scalar)
         {
             var (x, y, z) = a.Components;
 
-            return new ZKey10(x * scalar, y * scalar, z * scalar);
+            return new ZKey3D10(x * scalar, y * scalar, z * scalar);
         }
 
         // Equality implementations
-        public bool Equals(ZKey10 other) => _zKey == other._zKey;
+        public bool Equals(ZKey3D10 other) => _zKey == other._zKey;
         public bool Equals(uint other) => _zKey == other;
-        public bool Equals((uint x, uint y, uint z) other) => _zKey == ZKey10Util.Encode(other.x, other.y, other.z);
-        public override bool Equals(object obj) => obj is ZKey10 other && Equals(other);
+        public bool Equals((uint x, uint y, uint z) other) => _zKey == ZKey3D10Util.Encode(other.x, other.y, other.z);
+        public override bool Equals(object obj) => obj is ZKey3D10 other && Equals(other);
         public override int GetHashCode() => _zKey.GetHashCode();
 
         // Explicit conversions
-        public static explicit operator uint(ZKey10 key) => key._zKey;
-        public static explicit operator ZKey10(uint key) => new ZKey10(key);
-        public static explicit operator ZKey10(int key) => new ZKey10(key);
-        public static explicit operator ZKey10((uint, uint, uint) tuple) => new ZKey10(tuple);
-        public static explicit operator (uint, uint, uint)(ZKey10 key) => key.Components;
+        public static explicit operator uint(ZKey3D10 key) => key._zKey;
+        public static explicit operator ZKey3D10(uint key) => new ZKey3D10(key);
+        public static explicit operator ZKey3D10(int key) => new ZKey3D10(key);
+        public static explicit operator ZKey3D10((uint, uint, uint) tuple) => new ZKey3D10(tuple);
+        public static explicit operator (uint, uint, uint)(ZKey3D10 key) => key.Components;
 
         /// <summary>
         /// Creates a copy of this Morton key.
         /// </summary>
-        public ZKey10 Copy() => new ZKey10(_zKey);
+        public ZKey3D10 Copy() => new ZKey3D10(_zKey);
     }
 }

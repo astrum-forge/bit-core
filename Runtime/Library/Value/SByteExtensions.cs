@@ -87,7 +87,7 @@ namespace BitCore
 #if BITCORE_DEBUG
 			if (pos < 0 || pos > 7) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-7, was {pos}.");
 #endif
-			return (sbyte)(data | (1 << pos));
+			return (sbyte)((byte)data | (1 << pos));
 		}
 
 		/// <summary>

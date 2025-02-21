@@ -252,7 +252,7 @@ namespace BitCore
 			long value = 0;
 			for (int i = 0; i < 64; i++)
 			{
-				value = (value << 1) | (data[readIndex + i] - '0');
+				value = (value << 1) | ((uint)data[readIndex + i] - '0');
 			}
 			return value;
 		}

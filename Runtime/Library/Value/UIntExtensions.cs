@@ -10,26 +10,18 @@
 using System.Runtime.CompilerServices;
 #endif
 
-using System.Text;
+using System;
 
 namespace BitCore
 {
 	/// <summary>
-	/// Provides extension methods for the <see cref="uint"/> data type.
-	/// <para>
-	/// For more information, see:
-	/// <see href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/uint">uint keyword</see>.
-	/// </para>
-	/// <para>
-	/// PERFORMANCE NOTICE:
-	/// UNITY_EDITOR or DEBUG flags ensure that common errors are caught.
-	/// These flags are removed in production mode, so don't rely on try/catch methods.
-	/// If performing benchmarks, ensure that the flags are not taken into account.
-	/// </para>
-	/// <para>
-	/// CRITICAL CHANGES:
-	/// 20/12/2018 – For .NET 4.6 targets, all functions are hinted for AggressiveInlining.
-	/// </para>
+	/// Provides high-performance extension methods for the <see cref="uint"/> type, optimized for bit manipulation.
+	/// <para>See also: <see href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/uint">uint keyword</see>.</para>
+	/// <para><b>Performance Note:</b> Methods are aggressively inlined in .NET 4.6+ builds. Debug checks are included in development builds and stripped in release for maximum speed.</para>
+	/// <para><b>Change History:</b>
+	/// <list type="bullet">
+	///   <item>20/12/2018: Added AggressiveInlining for .NET 4.6 targets.</item>
+	/// </list></para>
 	/// </summary>
 	public static class UIntExtensions
 	{
@@ -37,145 +29,128 @@ namespace BitCore
 		/// Converts the <see cref="uint"/> value to a boolean.
 		/// </summary>
 		/// <param name="data">The uint value.</param>
-		/// <returns><c>true</c> if <paramref name="data"/> is greater than zero; otherwise, <c>false</c>.</returns>
+		/// <returns>True if the value is greater than zero; otherwise, false.</returns>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static bool Bool(this uint data) => data > 0;
 
 		/// <summary>
-		/// Gets the state of the bit (either 1 or 0) at the specified position.
+		/// Gets the bit value (0 or 1) at the specified position.
 		/// </summary>
 		/// <param name="data">The uint value.</param>
-		/// <param name="pos">The bit position (must be between 0 and 31).</param>
-		/// <returns>The value of the bit at the specified position.</returns>
+		/// <param name="pos">The bit position (0 to 31).</param>
+		/// <returns>1 if the bit is set; 0 if cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int BitAt(this uint data, int pos)
+		public static uint BitAt(this uint data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"uint.BitAt(int) - position must be between 0 and 31 but was {pos}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
 #endif
-			return (int)((data >> pos) & 1);
+			return (data >> pos) & 1u;
 		}
 
 		/// <summary>
-		/// Gets the inverted state of the bit (either 1 or 0) at the specified position.
+		/// Gets the inverted bit value (0 or 1) at the specified position.
 		/// </summary>
 		/// <param name="data">The uint value.</param>
-		/// <param name="pos">The bit position (must be between 0 and 31).</param>
-		/// <returns>The inverted bit value.</returns>
+		/// <param name="pos">The bit position (0 to 31).</param>
+		/// <returns>0 if the bit is set; 1 if cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int BitInvAt(this uint data, int pos)
+		public static uint BitInvAt(this uint data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"uint.BitInvAt(int) - position must be between 0 and 31 but was {pos}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
 #endif
-			return 1 - (int)((data >> pos) & 1);
+			return (~data >> pos) & 1u;
 		}
 
 		/// <summary>
 		/// Sets the bit at the specified position to 1.
 		/// </summary>
 		/// <param name="data">The uint value.</param>
-		/// <param name="pos">The bit position (must be between 0 and 31).</param>
-		/// <returns>A new uint with the bit at the specified position set to 1.</returns>
+		/// <param name="pos">The bit position (0 to 31).</param>
+		/// <returns>A new uint with the bit set.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static uint SetBitAt(this uint data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"uint.SetBitAt(int) - position must be between 0 and 31 but was {pos}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
 #endif
 			return data | (1u << pos);
 		}
 
 		/// <summary>
-		/// Clears the bit (sets to 0) at the specified position.
+		/// Clears the bit at the specified position to 0.
 		/// </summary>
 		/// <param name="data">The uint value.</param>
-		/// <param name="pos">The bit position (must be between 0 and 31).</param>
-		/// <returns>A new uint with the bit at the specified position cleared.</returns>
+		/// <param name="pos">The bit position (0 to 31).</param>
+		/// <returns>A new uint with the bit cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static uint UnsetBitAt(this uint data, int pos)
+		public static uint ClearBitAt(this uint data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"uint.UnsetBitAt(int) - position must be between 0 and 31 but was {pos}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
 #endif
 			return data & ~(1u << pos);
 		}
 
 		/// <summary>
-		/// Toggles the bit at the specified position.
+		/// Toggles the bit at the specified position (1 to 0, or 0 to 1).
 		/// </summary>
 		/// <param name="data">The uint value.</param>
-		/// <param name="pos">The bit position (must be between 0 and 31).</param>
-		/// <returns>A new uint with the bit at the specified position toggled.</returns>
+		/// <param name="pos">The bit position (0 to 31).</param>
+		/// <returns>A new uint with the bit toggled.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static uint ToggleBitAt(this uint data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"uint.ToggleBitAt(int) - position must be between 0 and 31 but was {pos}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
 #endif
 			return data ^ (1u << pos);
 		}
 
 		/// <summary>
-		/// Sets the bit at the specified position to the given value.
+		/// Sets the bit at the specified position to the given value (0 or 1).
 		/// </summary>
 		/// <param name="data">The uint value.</param>
-		/// <param name="pos">The bit position (must be between 0 and 31).</param>
-		/// <param name="bit">The bit value (must be either 0 or 1).</param>
-		/// <returns>A new uint with the specified bit set accordingly.</returns>
+		/// <param name="pos">The bit position (0 to 31).</param>
+		/// <param name="bit">The bit value (0 or 1).</param>
+		/// <returns>A new uint with the bit set to the specified value.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31 or bit is not 0/1.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static uint SetBit(this uint data, int pos, int bit)
+		public static uint SetBitValueAt(this uint data, int pos, int bit)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"uint.SetBit(int, int) - position must be between 0 and 31 but was {pos}");
-            }
-            if (bit != 0 && bit != 1)
-            {
-                BitDebug.Throw($"uint.SetBit(int, int) - bit value must be either 0 or 1 but was {bit}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
+			if (bit != 0 && bit != 1) throw new ArgumentOutOfRangeException(nameof(bit), $"Bit value must be 0 or 1, was {bit}.");
 #endif
-			uint mask = 1u << pos;
-			uint m1 = ((uint)bit << pos) & mask;
-			uint m2 = data & ~mask;
-			return m2 | m1;
+			return data & ~(1u << pos) | ((uint)bit << pos);
 		}
 
 		/// <summary>
-		/// Counts the number of set bits (population count) in the uint.
+		/// Counts the number of bits set to 1 in the uint (population count).
 		/// </summary>
 		/// <param name="data">The uint value.</param>
-		/// <returns>The number of bits set to 1.</returns>
+		/// <returns>The number of 1 bits (0 to 32).</returns>
+		/// <remarks>Uses a parallel bit summation algorithm for efficiency.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
@@ -187,109 +162,93 @@ namespace BitCore
 		}
 
 		/// <summary>
-		/// Determines whether the specified uint is a power of two.
+		/// Determines if the uint is a power of two.
 		/// </summary>
 		/// <param name="value">The uint value.</param>
-		/// <returns><c>true</c> if <paramref name="value"/> is a power of two; otherwise, <c>false</c>.</returns>
+		/// <returns>True if the value is a power of 2 (1, 2, 4, 8, etc.); otherwise, false.</returns>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static bool IsPowerOfTwo(this uint value)
-		{
-			return value != 0 && (value & (value - 1)) == 0;
-		}
+		public static bool IsPowerOfTwo(this uint value) => value != 0 && (value & (value - 1)) == 0;
 
 		/// <summary>
-		/// Retrieves the byte at the specified position within the uint.
+		/// Retrieves the byte at the specified position within the uint (big-endian order).
 		/// </summary>
 		/// <param name="data">The uint value.</param>
-		/// <param name="pos">
-		/// The byte position (must be between 0 and 3), where 0 corresponds to the most significant byte.
-		/// </param>
+		/// <param name="pos">The byte position (0 to 3, where 0 is the most significant byte).</param>
 		/// <returns>The byte at the specified position.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-3.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static byte ByteAt(this uint data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 3)
-            {
-                BitDebug.Throw($"uint.ByteAt(int) - position must be between 0 and 3 but was {pos}");
-            }
+			if (pos < 0 || pos > 3) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-3, was {pos}.");
 #endif
-			int shift = 24 - (pos * 8);
-			return (byte)(data >> shift);
+			return (byte)(data >> (24 - (pos * 8)));
 		}
 
 		/// <summary>
-		/// Sets the byte at the specified position within the uint.
+		/// Sets the byte at the specified position within the uint (big-endian order).
 		/// </summary>
 		/// <param name="data">The uint value.</param>
 		/// <param name="newData">The new byte value.</param>
-		/// <param name="pos">
-		/// The byte position (must be between 0 and 3), where 0 corresponds to the most significant byte.
-		/// </param>
-		/// <returns>A new uint with the specified byte replaced.</returns>
+		/// <param name="pos">The byte position (0 to 3, where 0 is the most significant byte).</param>
+		/// <returns>A new uint with the byte replaced.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-3.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static uint SetByteAt(this uint data, byte newData, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 3)
-            {
-                BitDebug.Throw($"uint.SetByteAt(int) - position must be between 0 and 3 but was {pos}");
-            }
+			if (pos < 0 || pos > 3) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-3, was {pos}.");
 #endif
 			int shift = 24 - (pos * 8);
 			uint mask = 0xFFu << shift;
-			uint m1 = ((uint)newData << shift) & mask;
-			uint m2 = data & ~mask;
-			return m2 | m1;
+			return (data & ~mask) | ((uint)newData << shift);
 		}
 
 		/// <summary>
-		/// Returns the binary string representation of the uint (32 characters of 1s and 0s).
+		/// Returns the binary string representation of the uint (32 characters of '0' or '1').
 		/// </summary>
 		/// <param name="value">The uint value.</param>
-		/// <returns>A string representing the binary sequence.</returns>
+		/// <returns>A 32-character string of bits, e.g., "00000000000000000000000000001111" for 15.</returns>
+		/// <remarks>For performance-critical code, consider avoiding string allocation.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static string BitString(this uint value)
 		{
-			var sb = new StringBuilder(32);
+			char[] bits = new char[32];
 			for (int i = 31; i >= 0; i--)
 			{
-				sb.Append(value.BitAt(i));
+				bits[31 - i] = (char)('0' + ((value >> i) & 1));
 			}
-			return sb.ToString();
+			return new string(bits);
 		}
 
 		/// <summary>
-		/// Converts a substring of binary characters into a uint.
+		/// Converts a 32-character substring of binary digits starting at <paramref name="readIndex"/> into a uint.
 		/// </summary>
-		/// <param name="data">A string containing '0' and '1'.</param>
-		/// <param name="readIndex">
-		/// The starting index from which to read 32 characters.
-		/// </param>
-		/// <returns>The uint value represented by the binary string.</returns>
+		/// <param name="data">The string of '0' and '1' characters.</param>
+		/// <param name="readIndex">The starting index (must allow 32 characters).</param>
+		/// <returns>The uint value represented by the substring.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if readIndex is invalid.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static uint UIntFromBitString(this string data, int readIndex)
 		{
 #if BITCORE_DEBUG
-            if (readIndex < 0 || readIndex + 32 > data.Length)
-            {
-                BitDebug.Throw("string.UIntFromBitString(int) - read index and uint length exceed the string length");
-            }
+			if (readIndex < 0 || readIndex + 32 > data.Length)
+				throw new ArgumentOutOfRangeException(nameof(readIndex), $"readIndex + 32 ({readIndex + 32}) exceeds string length ({data.Length}).");
 #endif
 			uint value = 0;
-			for (int i = readIndex, j = 31; i < readIndex + 32; i++, j--)
+			for (int i = 0; i < 32; i++)
 			{
-				value = data[i] == '1' ? value.SetBitAt(j) : value.UnsetBitAt(j);
+				value = (value << 1) | (uint)(data[readIndex + i] - '0');
 			}
 			return value;
 		}
@@ -297,21 +256,20 @@ namespace BitCore
 		/// <summary>
 		/// Converts the first 32 characters of a binary string into a uint.
 		/// </summary>
-		/// <param name="data">A string containing '0' and '1'.</param>
-		/// <returns>The uint value represented by the binary string.</returns>
+		/// <param name="data">The string of '0' and '1' characters.</param>
+		/// <returns>The uint value from the first 32 characters.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if string is too short.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static uint UIntFromBitString(this string data)
-		{
-			return data.UIntFromBitString(0);
-		}
+		public static uint UIntFromBitString(this string data) => data.UIntFromBitString(0);
 
 		/// <summary>
 		/// Returns the hexadecimal string representation of the uint.
 		/// </summary>
 		/// <param name="value">The uint value.</param>
-		/// <returns>A string representing the hexadecimal value.</returns>
+		/// <returns>A string like "FFFFFFFF" for 4294967295.</returns>
+		/// <remarks>For performance-critical code, consider avoiding string allocation.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif

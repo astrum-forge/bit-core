@@ -31,7 +31,7 @@ public static class UIntTests
 	{
 		for (int i = 0; i < LoopCount; i++)
 		{
-			int actual = TestValue.BitAt(i);
+			uint actual = TestValue.BitAt(i);
 			Assert.AreEqual(ExpectedBits[i], actual, $"BitAt({i}): expected {ExpectedBits[i]}, but got {actual}.");
 		}
 	}
@@ -42,7 +42,7 @@ public static class UIntTests
 		for (int i = 0; i < LoopCount; i++)
 		{
 			int expectedInverse = 1 - ExpectedBits[i];
-			int actual = TestValue.BitInvAt(i);
+			uint actual = TestValue.BitInvAt(i);
 			Assert.AreEqual(expectedInverse, actual, $"BitInvAt({i}): expected {expectedInverse}, but got {actual}.");
 		}
 	}
@@ -68,34 +68,34 @@ public static class UIntTests
 	}
 
 	[Test]
-	public static void Test_UnsetBitAt()
+	public static void Test_ClearBitAt()
 	{
 		for (int i = 0; i < LoopCount; i++)
 		{
-			uint result = TestValue.UnsetBitAt(i);
+			uint result = TestValue.ClearBitAt(i);
 			Assert.AreEqual(0, result.BitAt(i), $"After UnsetBitAt({i}), bit at position {i} should be 0.");
 		}
 	}
 
 	[Test]
-	public static void Test_SetBit()
+	public static void Test_SetBitValueAt()
 	{
 		for (int i = 0; i < LoopCount; i++)
 		{
-			uint result0 = TestValue.SetBit(i, 0);
-			uint result1 = TestValue.SetBit(i, 1);
+			uint result0 = TestValue.SetBitValueAt(i, 0);
+			uint result1 = TestValue.SetBitValueAt(i, 1);
 			Assert.AreEqual(0, result0.BitAt(i), $"SetBit({i}, 0) should set bit {i} to 0.");
 			Assert.AreEqual(1, result1.BitAt(i), $"SetBit({i}, 1) should set bit {i} to 1.");
 		}
 	}
 
 	[Test]
-	public static void Test_SetUnsetBit()
+	public static void Test_SetUnsetBitValueAt()
 	{
 		for (int i = 0; i < LoopCount; i++)
 		{
-			uint resultSetThenUnset = TestValue.SetBit(i, 0).SetBit(i, 1);
-			uint resultUnsetThenSet = TestValue.SetBit(i, 1).SetBit(i, 0);
+			uint resultSetThenUnset = TestValue.SetBitValueAt(i, 0).SetBitValueAt(i, 1);
+			uint resultUnsetThenSet = TestValue.SetBitValueAt(i, 1).SetBitValueAt(i, 0);
 			Assert.AreEqual(1, resultSetThenUnset.BitAt(i), $"After setting to 0 then 1 at bit {i}, expected 1.");
 			Assert.AreEqual(0, resultUnsetThenSet.BitAt(i), $"After setting to 1 then 0 at bit {i}, expected 0.");
 		}

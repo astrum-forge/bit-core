@@ -9,6 +9,8 @@ permissions: write-all
 jobs:
   update-version:
     runs-on: ubuntu-latest
+    outputs:
+      new_commit: ${{ steps.commit.outputs.NEW_COMMIT }} # Define job-level output
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -54,8 +56,9 @@ jobs:
         git config user.name "GitHub Actions Bot"
         git config user.email "actions@github.com"
         git add package.json
-        git commit -m "Bump version to ${{ steps.parse_version.outputs.version }}"
+        git commit -m "Bump version to ${{ steps.parse_version.outputs.version  }}" || true
         git push origin main
+        # Output the current HEAD SHA regardless of commit
         NEW_COMMIT=$(git rev-parse HEAD)
         echo "NEW_COMMIT=$NEW_COMMIT" >> $GITHUB_OUTPUT
   update-tag:
@@ -65,7 +68,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        ref: ${{ steps.update-version.outputs.NEW_COMMIT }} # Use the new commit SHA
+        ref: ${{ needs.update-version.outputs.new_commit }} # Use the new commit SHA
         fetch-depth: 0
     - name: Get current date
       id: date

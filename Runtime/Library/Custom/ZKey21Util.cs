@@ -7,14 +7,14 @@ namespace BitCore
     internal static class ZKey21Util
     {
         // Bit masks for isolating components (21 bits each, interleaved)
-        public static readonly ulong X_MASK = 0x1249249249249249; // 0001001001001001001001001001001001001001001001001001001001001001
-        public static readonly ulong Y_MASK = 0x2492492492492492; // 0010010010010010010010010010010010010010010010010010010010010010
-        public static readonly ulong Z_MASK = 0x4924924924924924; // 0100100100100100100100100100100100100100100100100100100100100100
+        public static readonly ulong X_MASK = 0x1249249249249249; // Bits for x: 1, 4, 7, ..., 61
+        public static readonly ulong Y_MASK = 0x2492492492492492; // Bits for y: 2, 5, 8, ..., 62
+        public static readonly ulong Z_MASK = 0x4924924924924924; // Bits for z: 3, 6, 9, ..., 63
 
         // Combined masks for component operations
-        public static readonly ulong XY_MASK = X_MASK | Y_MASK;
-        public static readonly ulong XZ_MASK = X_MASK | Z_MASK;
-        public static readonly ulong YZ_MASK = Y_MASK | Z_MASK;
+        public static readonly ulong XY_MASK = X_MASK | Y_MASK; // 0x369B6DB6DB6DB6DB
+        public static readonly ulong XZ_MASK = X_MASK | Z_MASK; // 0x5B6DB6DB6DB6DB6D
+        public static readonly ulong YZ_MASK = Y_MASK | Z_MASK; // 0x6DB6DB6DB6DB6DB6
 
         /// <summary>
         /// Encodes 3D coordinates into a single Morton key.

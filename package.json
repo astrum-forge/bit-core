@@ -1,22 +1,22 @@
 {
-    "name": "com.astrumforge.bitcore",
-    "version": "1.0.0",
-    "displayName": "BitCore",
-    "description": "A lightweight, high-performance C# library for bit manipulation and tuple conversions, optimized for Unity and real-time applications.",
-    "unity": "2020.3",
-    "unityRelease": "0f1",
-    "keywords": [
-        "bit-manipulation",
-        "tuple",
-        "performance",
-        "unity",
-        "utility"
-    ],
-    "author": {
-        "name": "David Arayan",
-        "email": "david@astrumforge.com",
-        "url": "https://www.astrumforge.com"
-    },
-    "license": "Apache-2.0",
-    "dependencies": {}
+  "name": "com.astrumforge.bitcore",
+  "version": "1.18.2",
+  "displayName": "BitCore",
+  "description": "A lightweight, high-performance C# library for bit manipulation and tuple conversions, optimized for Unity and real-time applications.",
+  "unity": "2020.3",
+  "unityRelease": "0f1",
+  "keywords": [
+    "bit-manipulation",
+    "tuple",
+    "performance",
+    "unity",
+    "utility"
+  ],
+  "author": {
+    "name": "David Arayan",
+    "email": "david@astrumforge.com",
+    "url": "https://www.astrumforge.com"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {}
 }

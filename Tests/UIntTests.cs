@@ -171,39 +171,39 @@ public static class UIntTests
 	[Test]
 	public static void Test_ByteTuple()
 	{
-		var byteTuple = TestValue.SplitIntoByte();
-		uint combined = byteTuple.CombineToUInt();
+		var byteTuple = TestValue.UnpackToBytes();
+		uint combined = byteTuple.PackToUInt();
 		Assert.AreEqual(TestValue, combined, $"Combining bytes should yield {TestValue}, but got {combined}.");
 	}
 
 	[Test]
 	public static void Test_SByteTuple()
 	{
-		var sbyteTuple = TestValue.SplitIntoSByte();
-		uint combined = sbyteTuple.CombineToUInt();
+		var sbyteTuple = TestValue.UnpackToSBytes();
+		uint combined = sbyteTuple.PackToUInt();
 		Assert.AreEqual(TestValue, combined, $"Combining sbytes should yield {TestValue}, but got {combined}.");
 	}
 
 	[Test]
 	public static void Test_ShortTuple()
 	{
-		var shortTuple = TestValue.SplitIntoShort();
-		uint combined = shortTuple.CombineToUInt();
+		var shortTuple = TestValue.UnpackToShorts();
+		uint combined = shortTuple.PackToUInt();
 		Assert.AreEqual(TestValue, combined, $"Combining shorts should yield {TestValue}, but got {combined}.");
 	}
 
 	[Test]
 	public static void Test_UShortTuple()
 	{
-		var ushortTuple = TestValue.SplitIntoUShort();
-		uint combined = ushortTuple.CombineToUInt();
+		var ushortTuple = TestValue.UnpackToUShorts();
+		uint combined = ushortTuple.PackToUInt();
 		Assert.AreEqual(TestValue, combined, $"Combining ushorts should yield {TestValue}, but got {combined}.");
 	}
 
 	[Test]
 	public static void Test_GetByte()
 	{
-		var byteTuple = TestValue.SplitIntoByte();
+		var byteTuple = TestValue.UnpackToBytes();
 		byte[] bytes = { byteTuple.Item1, byteTuple.Item2, byteTuple.Item3, byteTuple.Item4 };
 
 		for (int i = 0; i < 4; i++)
@@ -216,21 +216,21 @@ public static class UIntTests
 	[Test]
 	public static void Test_SetByteAt()
 	{
-		var originalTuple = TestValue.SplitIntoByte();
+		var originalTuple = TestValue.UnpackToBytes();
 		byte[] originalBytes = { originalTuple.Item1, originalTuple.Item2, originalTuple.Item3, originalTuple.Item4 };
 
 		// There are 4 bytes in a 32-bit uint.
 		for (int i = 0; i < 4; i++)
 		{
 			uint newValue = TestValue.SetByteAt(ExpectedBytes[i], i);
-			var newTuple = newValue.SplitIntoByte();
+			var newTuple = newValue.UnpackToBytes();
 			byte[] newBytes = { newTuple.Item1, newTuple.Item2, newTuple.Item3, newTuple.Item4 };
 
 			Assert.AreEqual(ExpectedBytes[i], newBytes[i], $"After SetByteAt({i}), expected byte {ExpectedBytes[i]}, but got {newBytes[i]}.");
 
 			// Revert to the original byte value.
 			newValue = newValue.SetByteAt(originalBytes[i], i);
-			newTuple = newValue.SplitIntoByte();
+			newTuple = newValue.UnpackToBytes();
 			newBytes = new byte[] { newTuple.Item1, newTuple.Item2, newTuple.Item3, newTuple.Item4 };
 
 			Assert.AreEqual(originalBytes[i], newBytes[i], $"After reverting SetByteAt({i}), expected byte {originalBytes[i]}, but got {newBytes[i]}.");

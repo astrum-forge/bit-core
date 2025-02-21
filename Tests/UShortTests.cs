@@ -177,8 +177,8 @@ public static class UShortTests
     [Test]
     public static void Test_ByteTuple()
     {
-        var tuple = TestValue.SplitIntoByte();
-        ushort result = tuple.CombineToUShort();
+        var tuple = TestValue.UnpackToBytes();
+        ushort result = tuple.PackToUShort();
         Assert.AreEqual(TestValue, result,
             $"Expected combined ushort from byte tuple to be {TestValue}, but got {result}.");
     }
@@ -186,8 +186,8 @@ public static class UShortTests
     [Test]
     public static void Test_SByteTuple()
     {
-        var tuple = TestValue.SplitIntoSByte();
-        ushort result = tuple.CombineToUShort();
+        var tuple = TestValue.UnpackToSBytes();
+        ushort result = tuple.PackToUShort();
         Assert.AreEqual(TestValue, result,
             $"Expected combined ushort from sbyte tuple to be {TestValue}, but got {result}.");
     }
@@ -195,7 +195,7 @@ public static class UShortTests
     [Test]
     public static void Test_GetByte()
     {
-        var tuple = TestValue.SplitIntoByte();
+        var tuple = TestValue.UnpackToBytes();
         byte[] expectedBytes = { tuple.Item1, tuple.Item2 };
         for (int i = 0; i < 2; i++)
         {
@@ -208,13 +208,13 @@ public static class UShortTests
     [Test]
     public static void Test_SetByteAt()
     {
-        var originalTuple = TestValue.SplitIntoByte();
+        var originalTuple = TestValue.UnpackToBytes();
         byte[] originalBytes = { originalTuple.Item1, originalTuple.Item2 };
 
         for (int i = 0; i < (LoopCount / 8); i++)
         {
             ushort newValue = TestValue.SetByteAt(ExpectedBytes[i], i);
-            var newTuple = newValue.SplitIntoByte();
+            var newTuple = newValue.UnpackToBytes();
             byte[] newBytes = { newTuple.Item1, newTuple.Item2 };
 
             Assert.AreEqual(ExpectedBytes[i], newBytes[i],
@@ -222,7 +222,7 @@ public static class UShortTests
 
             // Revert to the original value and verify
             newValue = newValue.SetByteAt(originalBytes[i], i);
-            newTuple = newValue.SplitIntoByte();
+            newTuple = newValue.UnpackToBytes();
             newBytes = new byte[] { newTuple.Item1, newTuple.Item2 };
 
             Assert.AreEqual(originalBytes[i], newBytes[i],

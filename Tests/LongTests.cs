@@ -189,8 +189,8 @@ public static class LongTests
     [Test]
     public static void Test_ByteTuple()
     {
-        var tuple = TestValue.SplitIntoByte();
-        long result = tuple.CombineToLong();
+        var tuple = TestValue.UnpackToBytes();
+        long result = tuple.PackToLong();
         Assert.AreEqual(TestValue, result,
             $"Expected combined long from byte tuple to be {TestValue}, but got {result}.");
     }
@@ -198,8 +198,8 @@ public static class LongTests
     [Test]
     public static void Test_SByteTuple()
     {
-        var tuple = TestValue.SplitIntoSByte();
-        long result = tuple.CombineToLong();
+        var tuple = TestValue.UnpackToSBytes();
+        long result = tuple.PackToLong();
         Assert.AreEqual(TestValue, result,
             $"Expected combined long from sbyte tuple to be {TestValue}, but got {result}.");
     }
@@ -207,8 +207,8 @@ public static class LongTests
     [Test]
     public static void Test_ShortTuple()
     {
-        var tuple = TestValue.SplitIntoShort();
-        long result = tuple.CombineToLong();
+        var tuple = TestValue.UnpackToShorts();
+        long result = tuple.PackToLong();
         Assert.AreEqual(TestValue, result,
             $"Expected combined long from short tuple to be {TestValue}, but got {result}.");
     }
@@ -216,8 +216,8 @@ public static class LongTests
     [Test]
     public static void Test_UShortTuple()
     {
-        var tuple = TestValue.SplitIntoUShort();
-        long result = tuple.CombineToLong();
+        var tuple = TestValue.UnpackToUShorts();
+        long result = tuple.PackToLong();
         Assert.AreEqual(TestValue, result,
             $"Expected combined long from ushort tuple to be {TestValue}, but got {result}.");
     }
@@ -225,8 +225,8 @@ public static class LongTests
     [Test]
     public static void Test_IntTuple()
     {
-        var tuple = TestValue.SplitIntoInt();
-        long result = tuple.CombineToLong();
+        var tuple = TestValue.UnpackToInts();
+        long result = tuple.PackToLong();
         Assert.AreEqual(TestValue, result,
             $"Expected combined long from int tuple to be {TestValue}, but got {result}.");
     }
@@ -234,8 +234,8 @@ public static class LongTests
     [Test]
     public static void Test_UIntTuple()
     {
-        var tuple = TestValue.SplitIntoUInt();
-        long result = tuple.CombineToLong();
+        var tuple = TestValue.UnpackToUInts();
+        long result = tuple.PackToLong();
         Assert.AreEqual(TestValue, result,
             $"Expected combined long from uint tuple to be {TestValue}, but got {result}.");
     }
@@ -243,8 +243,8 @@ public static class LongTests
     [Test]
     public static void Test_GetByte()
     {
-        // Note: SplitIntoByte() returns a nested tuple of two 4-byte tuples.
-        var tuple = TestValue.SplitIntoByte();
+        // Note: UnpackToByte() returns a nested tuple of two 4-byte tuples.
+        var tuple = TestValue.UnpackToBytes();
         byte[] expectedBytes = {
             tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4,
             tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8
@@ -261,7 +261,7 @@ public static class LongTests
     [Test]
     public static void Test_SetByteAt()
     {
-        var originalTuple = TestValue.SplitIntoByte();
+        var originalTuple = TestValue.UnpackToBytes();
         byte[] originalBytes = {
             originalTuple.Item1, originalTuple.Item2, originalTuple.Item3, originalTuple.Item4,
             originalTuple.Item5, originalTuple.Item6, originalTuple.Item7, originalTuple.Item8
@@ -270,7 +270,7 @@ public static class LongTests
         for (int i = 0; i < (LoopCount / 8); i++)
         {
             long newValue = TestValue.SetByteAt(ExpectedBytes[i], i);
-            var newTuple = newValue.SplitIntoByte();
+            var newTuple = newValue.UnpackToBytes();
             byte[] newBytes = {
                 newTuple.Item1, newTuple.Item2, newTuple.Item3, newTuple.Item4,
                 newTuple.Item5, newTuple.Item6, newTuple.Item7, newTuple.Item8
@@ -280,7 +280,7 @@ public static class LongTests
 
             // Revert to original and check.
             newValue = newValue.SetByteAt(originalBytes[i], i);
-            newTuple = newValue.SplitIntoByte();
+            newTuple = newValue.UnpackToBytes();
             newBytes = new byte[] {
                 newTuple.Item1, newTuple.Item2, newTuple.Item3, newTuple.Item4,
                 newTuple.Item5, newTuple.Item6, newTuple.Item7, newTuple.Item8

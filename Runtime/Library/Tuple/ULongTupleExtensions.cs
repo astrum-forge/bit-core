@@ -6,7 +6,6 @@
 #define BITCORE_METHOD_INLINE
 #endif
 
-using System;
 #if BITCORE_METHOD_INLINE
 using System.Runtime.CompilerServices;
 #endif
@@ -14,209 +13,208 @@ using System.Runtime.CompilerServices;
 namespace BitCore
 {
 	/// <summary>
-	/// Provides extension methods for combining and splitting 64‑bit unsigned integers using tuples.
+	/// Provides high-performance extension methods for packing tuples into and unpacking 64-bit unsigned integers.
+	/// <para>All operations use big-endian byte order (most significant byte first).</para>
+	/// <para><b>Performance Note:</b> Methods are aggressively inlined in .NET 4.6+ builds for minimal overhead.</para>
 	/// </summary>
 	public static class ULongTupleExtensions
 	{
 		/// <summary>
-		/// Combines a tuple of two <see cref="int"/> values into a 64‑bit unsigned integer.
-		/// Each int is first cast to an unsigned 32‑bit integer, with the first element forming the upper 32 bits
-		/// and the second element forming the lower 32 bits.
+		/// Packs a tuple of two signed integers into a 64-bit unsigned integer.
 		/// </summary>
-		/// <param name="tuple">A tuple containing two ints.</param>
-		/// <returns>A 64‑bit unsigned integer.</returns>
+		/// <param name="ints">A tuple containing two ints (i1, i2).</param>
+		/// <returns>A 64-bit unsigned integer with ints packed as i1:i2 (big-endian, treated as unsigned).</returns>
+		/// <remarks>Each int is cast to a uint, preserving its bit pattern (e.g., -1 becomes 4294967295). Bits are [i1:63-32, i2:31-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static ulong CombineToULong(this (int, int) tuple) =>
-			((ulong)(uint)tuple.Item1 << 32) | (uint)tuple.Item2;
+		public static ulong PackToULong(this (int i1, int i2) ints) =>
+			((ulong)(uint)ints.i1 << 32) | (uint)ints.i2;
 
 		/// <summary>
-		/// Combines a tuple of two <see cref="uint"/> values into a 64‑bit unsigned integer.
-		/// The first element forms the upper 32 bits and the second forms the lower 32 bits.
+		/// Packs a tuple of two unsigned integers into a 64-bit unsigned integer.
 		/// </summary>
-		/// <param name="tuple">A tuple containing two uints.</param>
-		/// <returns>A 64‑bit unsigned integer.</returns>
+		/// <param name="uints">A tuple containing two uints (u1, u2).</param>
+		/// <returns>A 64-bit unsigned integer with uints packed as u1:u2 (big-endian).</returns>
+		/// <remarks>Bits are arranged as [u1:63-32, u2:31-0]. Useful for data packing or serialization.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static ulong CombineToULong(this (uint, uint) tuple) =>
-			((ulong)tuple.Item1 << 32) | tuple.Item2;
+		public static ulong PackToULong(this (uint u1, uint u2) uints) =>
+			((ulong)uints.u1 << 32) | uints.u2;
 
 		/// <summary>
-		/// Combines a tuple of four <see cref="short"/> values into a 64‑bit unsigned integer.
-		/// Each short is cast to an unsigned 16‑bit integer before combining.
-		/// The tuple elements are arranged so that the first element becomes the most significant 16 bits.
+		/// Packs a tuple of four signed shorts into a 64-bit unsigned integer.
 		/// </summary>
-		/// <param name="tuple">A tuple containing four shorts.</param>
-		/// <returns>A 64‑bit unsigned integer.</returns>
+		/// <param name="shorts">A tuple containing four shorts (s1, s2, s3, s4).</param>
+		/// <returns>A 64-bit unsigned integer with shorts packed as s1:s2:s3:s4 (big-endian, treated as unsigned).</returns>
+		/// <remarks>Each short is cast to a ushort, preserving its bit pattern (e.g., -1 becomes 65535). Bits are [s1:63-48, s2:47-32, s3:31-16, s4:15-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static ulong CombineToULong(this (short, short, short, short) tuple) =>
-			((ulong)(ushort)tuple.Item1 << 48) |
-			((ulong)(ushort)tuple.Item2 << 32) |
-			((ulong)(ushort)tuple.Item3 << 16) |
-			(ushort)tuple.Item4;
+		public static ulong PackToULong(this (short s1, short s2, short s3, short s4) shorts) =>
+			((ulong)(ushort)shorts.s1 << 48) |
+			((ulong)(ushort)shorts.s2 << 32) |
+			((ulong)(ushort)shorts.s3 << 16) |
+			(ushort)shorts.s4;
 
 		/// <summary>
-		/// Combines a tuple of four <see cref="ushort"/> values into a 64‑bit unsigned integer.
-		/// The first element forms the upper 16 bits of the upper 32 bits, and so on.
+		/// Packs a tuple of four unsigned shorts into a 64-bit unsigned integer.
 		/// </summary>
-		/// <param name="tuple">A tuple containing four ushorts.</param>
-		/// <returns>A 64‑bit unsigned integer.</returns>
+		/// <param name="ushorts">A tuple containing four ushorts (us1, us2, us3, us4).</param>
+		/// <returns>A 64-bit unsigned integer with ushorts packed as us1:us2:us3:us4 (big-endian).</returns>
+		/// <remarks>Bits are arranged as [us1:63-48, us2:47-32, us3:31-16, us4:15-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static ulong CombineToULong(this (ushort, ushort, ushort, ushort) tuple) =>
-			((ulong)tuple.Item1 << 48) |
-			((ulong)tuple.Item2 << 32) |
-			((ulong)tuple.Item3 << 16) |
-			tuple.Item4;
+		public static ulong PackToULong(this (ushort us1, ushort us2, ushort us3, ushort us4) ushorts) =>
+			((ulong)ushorts.us1 << 48) |
+			((ulong)ushorts.us2 << 32) |
+			((ulong)ushorts.us3 << 16) |
+			ushorts.us4;
 
 		/// <summary>
-		/// Combines a tuple of eight <see cref="byte"/> values into a 64‑bit unsigned integer.
-		/// The tuple elements are arranged in order from the most significant byte (Item1) to the least significant (Item8).
+		/// Packs a tuple of eight bytes into a 64-bit unsigned integer.
 		/// </summary>
-		/// <param name="tuple">A tuple containing eight bytes.</param>
-		/// <returns>A 64‑bit unsigned integer.</returns>
+		/// <param name="bytes">A tuple containing eight bytes (b1, b2, b3, b4, b5, b6, b7, b8).</param>
+		/// <returns>A 64-bit unsigned integer with bytes packed as b1:b2:b3:b4:b5:b6:b7:b8 (big-endian).</returns>
+		/// <remarks>Bits are arranged as [b1:63-56, b2:55-48, b3:47-40, b4:39-32, b5:31-24, b6:23-16, b7:15-8, b8:7-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static ulong CombineToULong(this (byte, byte, byte, byte, byte, byte, byte, byte) tuple) =>
-			((ulong)tuple.Item1 << 56) |
-			((ulong)tuple.Item2 << 48) |
-			((ulong)tuple.Item3 << 40) |
-			((ulong)tuple.Item4 << 32) |
-			((ulong)tuple.Item5 << 24) |
-			((ulong)tuple.Item6 << 16) |
-			((ulong)tuple.Item7 << 8) |
-			tuple.Item8;
+		public static ulong PackToULong(this (byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7, byte b8) bytes) =>
+			((ulong)bytes.b1 << 56) |
+			((ulong)bytes.b2 << 48) |
+			((ulong)bytes.b3 << 40) |
+			((ulong)bytes.b4 << 32) |
+			((ulong)bytes.b5 << 24) |
+			((ulong)bytes.b6 << 16) |
+			((ulong)bytes.b7 << 8) |
+			bytes.b8;
 
 		/// <summary>
-		/// Combines a tuple of eight <see cref="sbyte"/> values into a 64‑bit unsigned integer.
-		/// Each sbyte is cast to a byte before combining.
-		/// The elements are ordered from the most significant (Item1) to the least significant (Item8).
+		/// Packs a tuple of eight signed bytes into a 64-bit unsigned integer.
 		/// </summary>
-		/// <param name="tuple">A tuple containing eight sbytes.</param>
-		/// <returns>A 64‑bit unsigned integer.</returns>
+		/// <param name="sbytes">A tuple containing eight sbytes (sb1, sb2, sb3, sb4, sb5, sb6, sb7, sb8).</param>
+		/// <returns>A 64-bit unsigned integer with sbytes packed as sb1:sb2:sb3:sb4:sb5:sb6:sb7:sb8 (big-endian, treated as unsigned).</returns>
+		/// <remarks>Each sbyte is cast to a byte, preserving its bit pattern (e.g., -1 becomes 255). Bits are [sb1:63-56, sb2:55-48, ..., sb8:7-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static ulong CombineToULong(this (sbyte, sbyte, sbyte, sbyte, sbyte, sbyte, sbyte, sbyte) tuple) =>
-			((ulong)(byte)tuple.Item1 << 56) |
-			((ulong)(byte)tuple.Item2 << 48) |
-			((ulong)(byte)tuple.Item3 << 40) |
-			((ulong)(byte)tuple.Item4 << 32) |
-			((ulong)(byte)tuple.Item5 << 24) |
-			((ulong)(byte)tuple.Item6 << 16) |
-			((ulong)(byte)tuple.Item7 << 8) |
-			(byte)tuple.Item8;
+		public static ulong PackToULong(this (sbyte sb1, sbyte sb2, sbyte sb3, sbyte sb4, sbyte sb5, sbyte sb6, sbyte sb7, sbyte sb8) sbytes) =>
+			((ulong)(byte)sbytes.sb1 << 56) |
+			((ulong)(byte)sbytes.sb2 << 48) |
+			((ulong)(byte)sbytes.sb3 << 40) |
+			((ulong)(byte)sbytes.sb4 << 32) |
+			((ulong)(byte)sbytes.sb5 << 24) |
+			((ulong)(byte)sbytes.sb6 << 16) |
+			((ulong)(byte)sbytes.sb7 << 8) |
+			(byte)sbytes.sb8;
 
 		/// <summary>
-		/// Splits a 64‑bit unsigned integer into a tuple of eight <see cref="byte"/> values.
-		/// The resulting tuple contains bytes ordered from the most significant (Item1) to the least significant (Item8).
+		/// Unpacks a 64-bit unsigned integer into a tuple of eight bytes.
 		/// </summary>
-		/// <param name="value">The 64‑bit unsigned integer to split.</param>
-		/// <returns>A tuple of eight bytes.</returns>
+		/// <param name="ulongValue">The 64-bit unsigned integer value.</param>
+		/// <returns>A tuple containing eight bytes (b1, b2, b3, b4, b5, b6, b7, b8) in big-endian order.</returns>
+		/// <remarks>Bytes are extracted as [b1:63-56, b2:55-48, b3:47-40, b4:39-32, b5:31-24, b6:23-16, b7:15-8, b8:7-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static (byte, byte, byte, byte, byte, byte, byte, byte) SplitIntoByte(this ulong value) =>
+		public static (byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7, byte b8) UnpackToBytes(this ulong ulongValue) =>
 			(
-				 (byte)(value >> 56),
-				 (byte)(value >> 48),
-				 (byte)(value >> 40),
-				 (byte)(value >> 32),
-				 (byte)(value >> 24),
-				 (byte)(value >> 16),
-				 (byte)(value >> 8),
-				 (byte)value
+				(byte)(ulongValue >> 56),
+				(byte)(ulongValue >> 48),
+				(byte)(ulongValue >> 40),
+				(byte)(ulongValue >> 32),
+				(byte)(ulongValue >> 24),
+				(byte)(ulongValue >> 16),
+				(byte)(ulongValue >> 8),
+				(byte)ulongValue
 			);
 
 		/// <summary>
-		/// Splits a 64‑bit unsigned integer into a tuple of eight <see cref="sbyte"/> values.
-		/// The resulting tuple contains sbytes ordered from the most significant (Item1) to the least significant (Item8).
+		/// Unpacks a 64-bit unsigned integer into a tuple of eight signed bytes.
 		/// </summary>
-		/// <param name="value">The 64‑bit unsigned integer to split.</param>
-		/// <returns>A tuple of eight sbytes.</returns>
+		/// <param name="ulongValue">The 64-bit unsigned integer value.</param>
+		/// <returns>A tuple containing eight sbytes (sb1, sb2, sb3, sb4, sb5, sb6, sb7, sb8) in big-endian order.</returns>
+		/// <remarks>Bytes are interpreted as signed values (e.g., 255 becomes -1). Bits are [sb1:63-56, sb2:55-48, ..., sb8:7-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static (sbyte, sbyte, sbyte, sbyte, sbyte, sbyte, sbyte, sbyte) SplitIntoSByte(this ulong value) =>
+		public static (sbyte sb1, sbyte sb2, sbyte sb3, sbyte sb4, sbyte sb5, sbyte sb6, sbyte sb7, sbyte sb8) UnpackToSBytes(this ulong ulongValue) =>
 			(
-				(sbyte)(value >> 56),
-				(sbyte)(value >> 48),
-				(sbyte)(value >> 40),
-				(sbyte)(value >> 32),
-				(sbyte)(value >> 24),
-				(sbyte)(value >> 16),
-				(sbyte)(value >> 8),
-				(sbyte)value
+				(sbyte)(ulongValue >> 56),
+				(sbyte)(ulongValue >> 48),
+				(sbyte)(ulongValue >> 40),
+				(sbyte)(ulongValue >> 32),
+				(sbyte)(ulongValue >> 24),
+				(sbyte)(ulongValue >> 16),
+				(sbyte)(ulongValue >> 8),
+				(sbyte)ulongValue
 			);
 
 		/// <summary>
-		/// Splits a 64‑bit unsigned integer into a tuple of four <see cref="short"/> values.
-		/// The tuple elements are ordered from the most significant 16 bits (Item1) to the least (Item4).
+		/// Unpacks a 64-bit unsigned integer into a tuple of four signed shorts.
 		/// </summary>
-		/// <param name="value">The 64‑bit unsigned integer to split.</param>
-		/// <returns>A tuple of four shorts.</returns>
+		/// <param name="ulongValue">The 64-bit unsigned integer value.</param>
+		/// <returns>A tuple containing four shorts (s1, s2, s3, s4) in big-endian order.</returns>
+		/// <remarks>Shorts are interpreted as signed values (e.g., 65535 becomes -1). Bits are [s1:63-48, s2:47-32, s3:31-16, s4:15-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static (short, short, short, short) SplitIntoShort(this ulong value) =>
+		public static (short s1, short s2, short s3, short s4) UnpackToShorts(this ulong ulongValue) =>
 			(
-				(short)(value >> 48),
-				(short)(value >> 32),
-				(short)(value >> 16),
-				(short)value
+				(short)(ulongValue >> 48),
+				(short)(ulongValue >> 32),
+				(short)(ulongValue >> 16),
+				(short)ulongValue
 			);
 
 		/// <summary>
-		/// Splits a 64‑bit unsigned integer into a tuple of four <see cref="ushort"/> values.
-		/// The resulting tuple contains ushorts ordered from the most significant (Item1) to the least significant (Item4).
+		/// Unpacks a 64-bit unsigned integer into a tuple of four unsigned shorts.
 		/// </summary>
-		/// <param name="value">The 64‑bit unsigned integer to split.</param>
-		/// <returns>A tuple of four ushorts.</returns>
+		/// <param name="ulongValue">The 64-bit unsigned integer value.</param>
+		/// <returns>A tuple containing four ushorts (us1, us2, us3, us4) in big-endian order.</returns>
+		/// <remarks>Bits are extracted as [us1:63-48, us2:47-32, us3:31-16, us4:15-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static (ushort, ushort, ushort, ushort) SplitIntoUShort(this ulong value) =>
+		public static (ushort us1, ushort us2, ushort us3, ushort us4) UnpackToUShorts(this ulong ulongValue) =>
 			(
-				(ushort)(value >> 48),
-				(ushort)(value >> 32),
-				(ushort)(value >> 16),
-				(ushort)value
+				(ushort)(ulongValue >> 48),
+				(ushort)(ulongValue >> 32),
+				(ushort)(ulongValue >> 16),
+				(ushort)ulongValue
 			);
 
 		/// <summary>
-		/// Splits a 64‑bit unsigned integer into a tuple of two <see cref="int"/> values.
-		/// The first element represents the upper 32 bits, and the second represents the lower 32 bits.
+		/// Unpacks a 64-bit unsigned integer into a tuple of two signed integers.
 		/// </summary>
-		/// <param name="value">The 64‑bit unsigned integer to split.</param>
-		/// <returns>A tuple of two ints.</returns>
+		/// <param name="ulongValue">The 64-bit unsigned integer value.</param>
+		/// <returns>A tuple containing two ints (i1, i2) in big-endian order.</returns>
+		/// <remarks>Ints are interpreted as signed values (e.g., 4294967295 becomes -1). Bits are [i1:63-32, i2:31-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static (int, int) SplitIntoInt(this ulong value) =>
+		public static (int i1, int i2) UnpackToInts(this ulong ulongValue) =>
 			(
-				(int)(value >> 32),
-				(int)value
+				(int)(ulongValue >> 32),
+				(int)ulongValue
 			);
 
 		/// <summary>
-		/// Splits a 64‑bit unsigned integer into a tuple of two <see cref="uint"/> values.
-		/// The first element represents the upper 32 bits, and the second represents the lower 32 bits.
+		/// Unpacks a 64-bit unsigned integer into a tuple of two unsigned integers.
 		/// </summary>
-		/// <param name="value">The 64‑bit unsigned integer to split.</param>
-		/// <returns>A tuple of two uints.</returns>
+		/// <param name="ulongValue">The 64-bit unsigned integer value.</param>
+		/// <returns>A tuple containing two uints (u1, u2) in big-endian order.</returns>
+		/// <remarks>Bits are extracted as [u1:63-32, u2:31-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static (uint, uint) SplitIntoUInt(this ulong value) =>
+		public static (uint u1, uint u2) UnpackToUInts(this ulong ulongValue) =>
 			(
-				(uint)(value >> 32),
-				(uint)value
+				(uint)(ulongValue >> 32),
+				(uint)ulongValue
 			);
 	}
 }

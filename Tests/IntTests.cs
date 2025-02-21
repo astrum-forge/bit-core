@@ -187,8 +187,8 @@ public static class IntTests
     [Test]
     public static void Test_ByteTuple()
     {
-        var tuple = TestValue.SplitIntoByte();
-        int result = tuple.CombineToInt();
+        var tuple = TestValue.UnpackToBytes();
+        int result = tuple.PackToInt();
         Assert.AreEqual(TestValue, result,
             $"Expected combined int from byte tuple to be {TestValue}, but got {result}.");
     }
@@ -196,8 +196,8 @@ public static class IntTests
     [Test]
     public static void Test_SByteTuple()
     {
-        var tuple = TestValue.SplitIntoSByte();
-        int result = tuple.CombineToInt();
+        var tuple = TestValue.UnpackToSBytes();
+        int result = tuple.PackToInt();
         Assert.AreEqual(TestValue, result,
             $"Expected combined int from sbyte tuple to be {TestValue}, but got {result}.");
     }
@@ -205,8 +205,8 @@ public static class IntTests
     [Test]
     public static void Test_ShortTuple()
     {
-        var tuple = TestValue.SplitIntoShort();
-        int result = tuple.CombineToInt();
+        var tuple = TestValue.UnpackToShorts();
+        int result = tuple.PackToInt();
         Assert.AreEqual(TestValue, result,
             $"Expected combined int from short tuple to be {TestValue}, but got {result}.");
     }
@@ -214,8 +214,8 @@ public static class IntTests
     [Test]
     public static void Test_UShortTuple()
     {
-        var tuple = TestValue.SplitIntoUShort();
-        int result = tuple.CombineToInt();
+        var tuple = TestValue.UnpackToUShorts();
+        int result = tuple.PackToInt();
         Assert.AreEqual(TestValue, result,
             $"Expected combined int from ushort tuple to be {TestValue}, but got {result}.");
     }
@@ -223,7 +223,7 @@ public static class IntTests
     [Test]
     public static void Test_GetByte()
     {
-        var tuple = TestValue.SplitIntoByte();
+        var tuple = TestValue.UnpackToBytes();
         byte[] expectedBytes = { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4 };
         for (int i = 0; i < 4; i++)
         {
@@ -236,13 +236,13 @@ public static class IntTests
     [Test]
     public static void Test_SetByteAt()
     {
-        var originalTuple = TestValue.SplitIntoByte();
+        var originalTuple = TestValue.UnpackToBytes();
         byte[] originalBytes = { originalTuple.Item1, originalTuple.Item2, originalTuple.Item3, originalTuple.Item4 };
 
         for (int i = 0; i < 4; i++)
         {
             int newValue = TestValue.SetByteAt(ExpectedBytes[i], i);
-            var newTuple = newValue.SplitIntoByte();
+            var newTuple = newValue.UnpackToBytes();
             byte[] newBytes = { newTuple.Item1, newTuple.Item2, newTuple.Item3, newTuple.Item4 };
 
             Assert.AreEqual(ExpectedBytes[i], newBytes[i],
@@ -250,7 +250,7 @@ public static class IntTests
 
             // Revert the change and verify original value is restored
             newValue = newValue.SetByteAt(originalBytes[i], i);
-            newTuple = newValue.SplitIntoByte();
+            newTuple = newValue.UnpackToBytes();
             newBytes = new byte[] { newTuple.Item1, newTuple.Item2, newTuple.Item3, newTuple.Item4 };
 
             Assert.AreEqual(originalBytes[i], newBytes[i],

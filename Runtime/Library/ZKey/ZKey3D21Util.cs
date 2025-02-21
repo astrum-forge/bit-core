@@ -1,3 +1,15 @@
+#if UNITY_EDITOR
+#define BITCORE_DEBUG
+#endif
+
+#if NET_4_6 && !BITCORE_DISABLE_INLINE
+#define BITCORE_METHOD_INLINE
+#endif
+
+#if BITCORE_METHOD_INLINE
+using System.Runtime.CompilerServices;
+#endif
+
 namespace BitCore
 {
     /// <summary>
@@ -19,6 +31,9 @@ namespace BitCore
         /// <summary>
         /// Encodes 3D coordinates into a single Morton key.
         /// </summary>
+#if BITCORE_METHOD_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ulong Encode(uint x, uint y, uint z)
         {
             return (EncodePart(z) << 2) | (EncodePart(y) << 1) | EncodePart(x);
@@ -27,6 +42,9 @@ namespace BitCore
         /// <summary>
         /// Decodes a Morton key into its x, y, z components.
         /// </summary>
+#if BITCORE_METHOD_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static (uint x, uint y, uint z) Decode(ulong zKey)
         {
             return (DecodePart(zKey), DecodePart(zKey >> 1), DecodePart(zKey >> 2));
@@ -35,6 +53,9 @@ namespace BitCore
         /// <summary>
         /// Encodes a single 21-bit component into its interleaved form.
         /// </summary>
+#if BITCORE_METHOD_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ulong EncodePart(uint n)
         {
             ulong n0 = n & 0x001FFFFF; // Mask to 21 bits
@@ -51,6 +72,9 @@ namespace BitCore
         /// <summary>
         /// Decodes a single interleaved component back to its 21-bit value.
         /// </summary>
+#if BITCORE_METHOD_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static uint DecodePart(ulong n)
         {
             ulong n0 = n & 0x9249249249249249;
@@ -65,13 +89,35 @@ namespace BitCore
         }
 
         // Increment operations
+#if BITCORE_METHOD_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ulong IncX(ulong zKey) => ((zKey | YZ_MASK) + 1) & X_MASK | (zKey & YZ_MASK);
+
+#if BITCORE_METHOD_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ulong IncY(ulong zKey) => ((zKey | XZ_MASK) + 2) & Y_MASK | (zKey & XZ_MASK);
+
+#if BITCORE_METHOD_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ulong IncZ(ulong zKey) => ((zKey | XY_MASK) + 1) & Z_MASK | (zKey & XY_MASK);
 
         // Decrement operations
+#if BITCORE_METHOD_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ulong DecX(ulong zKey) => ((zKey & X_MASK) - 1) & X_MASK | (zKey & YZ_MASK);
+
+#if BITCORE_METHOD_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ulong DecY(ulong zKey) => ((zKey & Y_MASK) - 2) & Y_MASK | (zKey & XZ_MASK);
+
+#if BITCORE_METHOD_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ulong DecZ(ulong zKey) => ((zKey & Z_MASK) - 1) & Z_MASK | (zKey & XY_MASK);
     }
 }

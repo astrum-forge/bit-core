@@ -6,7 +6,6 @@
 #define BITCORE_METHOD_INLINE
 #endif
 
-using System;
 #if BITCORE_METHOD_INLINE
 using System.Runtime.CompilerServices;
 #endif
@@ -14,56 +13,58 @@ using System.Runtime.CompilerServices;
 namespace BitCore
 {
 	/// <summary>
-	/// Provides extension methods for converting between <see cref="short"/> values and tuple representations.
+	/// Provides high-performance extension methods for packing tuples into and unpacking 16-bit signed integers.
+	/// <para>All operations use big-endian byte order (most significant byte first).</para>
+	/// <para><b>Performance Note:</b> Methods are aggressively inlined in .NET 4.6+ builds for minimal overhead.</para>
 	/// </summary>
 	public static class ShortTupleExtensions
 	{
 		/// <summary>
-		/// Combines a tuple of two <see cref="byte"/> values into a <see cref="short"/>.
-		/// The first byte forms the high 8 bits, and the second forms the low 8 bits.
+		/// Packs a tuple of two bytes into a 16-bit signed integer.
 		/// </summary>
-		/// <param name="tuple">A tuple containing two bytes.</param>
-		/// <returns>A <see cref="short"/> constructed from the two bytes.</returns>
+		/// <param name="bytes">A tuple containing two bytes (b1, b2).</param>
+		/// <returns>A 16-bit signed integer with bytes packed as b1:b2 (big-endian).</returns>
+		/// <remarks>Bits are arranged as [b1:15-8, b2:7-0]. Useful for data packing or serialization.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static short CombineToShort(this (byte, byte) tuple) =>
-			(short)tuple.CombineToUShort();
+		public static short PackToShort(this (byte b1, byte b2) bytes) =>
+			(short)(bytes.b1 << 8 | bytes.b2);
 
 		/// <summary>
-		/// Combines a tuple of two <see cref="sbyte"/> values into a <see cref="short"/>.
-		/// Each sbyte is cast to a byte before combining.
+		/// Packs a tuple of two signed bytes into a 16-bit signed integer.
 		/// </summary>
-		/// <param name="tuple">A tuple containing two sbytes.</param>
-		/// <returns>A <see cref="short"/> constructed from the two sbytes.</returns>
+		/// <param name="sbytes">A tuple containing two sbytes (sb1, sb2).</param>
+		/// <returns>A 16-bit signed integer with sbytes packed as sb1:sb2 (big-endian, treated as unsigned bytes).</returns>
+		/// <remarks>Each sbyte is cast to a byte, preserving its bit pattern (e.g., -1 becomes 255). Bits are [sb1:15-8, sb2:7-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static short CombineToShort(this (sbyte, sbyte) tuple) =>
-			(short)tuple.CombineToUShort();
+		public static short PackToShort(this (sbyte sb1, sbyte sb2) sbytes) =>
+			(short)((byte)sbytes.sb1 << 8 | (byte)sbytes.sb2);
 
 		/// <summary>
-		/// Splits a <see cref="short"/> into a tuple of two <see cref="byte"/> values.
-		/// The first element is the high byte, and the second is the low byte.
+		/// Unpacks a 16-bit signed integer into a tuple of two bytes.
 		/// </summary>
-		/// <param name="value">The <see cref="short"/> value to split.</param>
-		/// <returns>A tuple containing two bytes.</returns>
+		/// <param name="shortValue">The 16-bit signed integer value.</param>
+		/// <returns>A tuple containing two bytes (b1, b2) in big-endian order.</returns>
+		/// <remarks>Bytes are extracted as [b1:15-8, b2:7-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static (byte, byte) SplitIntoByte(this short value) =>
-			((ushort)value).SplitIntoByte();
+		public static (byte b1, byte b2) UnpackToBytes(this short shortValue) =>
+			((byte)(shortValue >> 8), (byte)shortValue);
 
 		/// <summary>
-		/// Splits a <see cref="short"/> into a tuple of two <see cref="sbyte"/> values.
-		/// The first element is the high sbyte, and the second is the low sbyte.
+		/// Unpacks a 16-bit signed integer into a tuple of two signed bytes.
 		/// </summary>
-		/// <param name="value">The <see cref="short"/> value to split.</param>
-		/// <returns>A tuple containing two sbytes.</returns>
+		/// <param name="shortValue">The 16-bit signed integer value.</param>
+		/// <returns>A tuple containing two sbytes (sb1, sb2) in big-endian order.</returns>
+		/// <remarks>Bytes are interpreted as signed values (e.g., 255 becomes -1). Bits are [sb1:15-8, sb2:7-0].</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static (sbyte, sbyte) SplitIntoSByte(this short value) =>
-			((ushort)value).SplitIntoSByte();
+		public static (sbyte sb1, sbyte sb2) UnpackToSBytes(this short shortValue) =>
+			((sbyte)(shortValue >> 8), (sbyte)shortValue);
 	}
 }

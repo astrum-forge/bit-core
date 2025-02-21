@@ -64,23 +64,23 @@ public static class SByteTests
     }
 
     [Test]
-    public static void Test_UnsetBitAt()
+    public static void Test_ClearBitAt()
     {
         for (int i = 0; i < LoopCount; i++)
         {
-            sbyte result = TestValue.UnsetBitAt(i);
+            sbyte result = TestValue.ClearBitAt(i);
             Assert.AreEqual(0, result.BitAt(i),
                 $"After UnsetBitAt({i}), expected bit to be 0.");
         }
     }
 
     [Test]
-    public static void Test_SetBit()
+    public static void Test_SetBitValueAt()
     {
         for (int i = 0; i < LoopCount; i++)
         {
-            sbyte result0 = TestValue.SetBit(i, 0);
-            sbyte result1 = TestValue.SetBit(i, 1);
+            sbyte result0 = TestValue.SetBitValueAt(i, 0);
+            sbyte result1 = TestValue.SetBitValueAt(i, 1);
             Assert.AreEqual(0, result0.BitAt(i),
                 $"SetBit({i}, 0): expected bit to be 0.");
             Assert.AreEqual(1, result1.BitAt(i),
@@ -89,12 +89,12 @@ public static class SByteTests
     }
 
     [Test]
-    public static void Test_SetUnsetBit()
+    public static void Test_SetUnsetBitValueAt()
     {
         for (int i = 0; i < LoopCount; i++)
         {
-            sbyte result1 = TestValue.SetBit(i, 0).SetBit(i, 1);
-            sbyte result0 = TestValue.SetBit(i, 1).SetBit(i, 0);
+            sbyte result1 = TestValue.SetBitValueAt(i, 0).SetBitValueAt(i, 1);
+            sbyte result0 = TestValue.SetBitValueAt(i, 1).SetBitValueAt(i, 0);
             Assert.AreEqual(1, result1.BitAt(i),
                 $"After setting 0 then 1 at bit {i}, expected bit to be 1.");
             Assert.AreEqual(0, result0.BitAt(i),

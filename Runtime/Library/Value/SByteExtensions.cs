@@ -6,255 +6,273 @@
 #define BITCORE_METHOD_INLINE
 #endif
 
-using System;
 #if BITCORE_METHOD_INLINE
 using System.Runtime.CompilerServices;
 #endif
-using System.Text;
+
+using System;
 
 namespace BitCore
 {
 	/// <summary>
-	/// Provides extension methods for the <see cref="sbyte"/> type.
-	/// <para>sbyte is a signed 8‑bit integer.</para>
-	/// <para>
-	/// In debug builds, error checks are enabled; these are removed in production.
-	/// For .NET 4.6 targets, methods are hinted for aggressive inlining.
-	/// </para>
+	/// Provides high-performance extension methods for the <see cref="sbyte"/> type, optimized for bit manipulation and conversions.
+	/// <para>An <see cref="sbyte"/> is a signed 8-bit integer (-128 to 127).</para>
+	/// <para>See also: <see href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sbyte">sbyte keyword</see>.</para>
+	/// <para><b>Performance Note:</b> Methods are aggressively inlined in .NET 4.6+ builds. Debug checks are included in development builds and stripped in release for maximum speed.</para>
+	/// <para><b>Change History:</b>
+	/// <list type="bullet">
+	///   <item>20/12/2018: Added AggressiveInlining for .NET 4.6 targets.</item>
+	/// </list></para>
 	/// </summary>
 	public static class SByteExtensions
 	{
 		/// <summary>
-		/// Returns <c>true</c> if the sbyte value is greater than zero.
+		/// Converts the <see cref="sbyte"/> value to a boolean.
 		/// </summary>
 		/// <param name="data">The sbyte value.</param>
-		/// <returns><c>true</c> if greater than zero; otherwise, <c>false</c>.</returns>
+		/// <returns>True if the value is greater than zero; otherwise, false.</returns>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static bool Bool(this sbyte data) => data > 0;
 
 		/// <summary>
-		/// Retrieves the bit (0 or 1) at the specified position.
-		/// The position must be between 0 and 7.
+		/// Gets the bit value (0 or 1) at the specified position.
 		/// </summary>
 		/// <param name="data">The sbyte value.</param>
-		/// <param name="pos">The bit position (0–7).</param>
-		/// <returns>The bit (0 or 1) at the specified position.</returns>
+		/// <param name="pos">The bit position (0 to 7).</param>
+		/// <returns>1 if the bit is set; 0 if cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-7.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int BitAt(this sbyte data, int pos)
+		public static sbyte BitAt(this sbyte data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 7)
-                BitDebug.Throw($"sbyte.BitAt(int) - position must be between 0 and 7 but was {pos}");
+			if (pos < 0 || pos > 7) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-7, was {pos}.");
 #endif
-			return (data >> pos) & 1;
+			return (sbyte)((data >> pos) & 1);
 		}
 
 		/// <summary>
-		/// Returns the inverted bit at the specified position.
-		/// If the bit is 1, returns 0; if 0, returns 1.
-		/// The position must be between 0 and 7.
+		/// Gets the inverted bit value (0 or 1) at the specified position.
 		/// </summary>
 		/// <param name="data">The sbyte value.</param>
-		/// <param name="pos">The bit position (0–7).</param>
-		/// <returns>The inverted bit (0 or 1) at the specified position.</returns>
+		/// <param name="pos">The bit position (0 to 7).</param>
+		/// <returns>0 if the bit is set; 1 if cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-7.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int BitInvAt(this sbyte data, int pos)
+		public static sbyte BitInvAt(this sbyte data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 7)
-                BitDebug.Throw($"sbyte.BitInvAt(int) - position must be between 0 and 7 but was {pos}");
+			if (pos < 0 || pos > 7) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-7, was {pos}.");
 #endif
-			return 1 - ((data >> pos) & 1);
+			return (sbyte)((~data >> pos) & 1);
 		}
 
 		/// <summary>
 		/// Sets the bit at the specified position to 1.
-		/// The position must be between 0 and 7.
 		/// </summary>
 		/// <param name="data">The sbyte value.</param>
-		/// <param name="pos">The bit position (0–7).</param>
-		/// <returns>A new sbyte with the specified bit set to 1.</returns>
+		/// <param name="pos">The bit position (0 to 7).</param>
+		/// <returns>A new sbyte with the bit set.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-7.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static sbyte SetBitAt(this sbyte data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 7)
-                BitDebug.Throw($"sbyte.SetBitAt(int) - position must be between 0 and 7 but was {pos}");
+			if (pos < 0 || pos > 7) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-7, was {pos}.");
 #endif
-			return (sbyte)(((byte)data) | (1 << pos));
+			return (sbyte)(data | (1 << pos));
 		}
 
 		/// <summary>
-		/// Clears (sets to 0) the bit at the specified position.
-		/// The position must be between 0 and 7.
+		/// Clears the bit at the specified position to 0.
 		/// </summary>
 		/// <param name="data">The sbyte value.</param>
-		/// <param name="pos">The bit position (0–7).</param>
-		/// <returns>A new sbyte with the specified bit cleared.</returns>
+		/// <param name="pos">The bit position (0 to 7).</param>
+		/// <returns>A new sbyte with the bit cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-7.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static sbyte UnsetBitAt(this sbyte data, int pos)
+		public static sbyte ClearBitAt(this sbyte data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 7)
-                BitDebug.Throw($"sbyte.UnsetBitAt(int) - position must be between 0 and 7 but was {pos}");
+			if (pos < 0 || pos > 7) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-7, was {pos}.");
 #endif
 			return (sbyte)(data & ~(1 << pos));
 		}
 
 		/// <summary>
-		/// Toggles the bit at the specified position.
-		/// The position must be between 0 and 7.
+		/// Toggles the bit at the specified position (1 to 0, or 0 to 1).
 		/// </summary>
 		/// <param name="data">The sbyte value.</param>
-		/// <param name="pos">The bit position (0–7).</param>
-		/// <returns>A new sbyte with the specified bit toggled.</returns>
+		/// <param name="pos">The bit position (0 to 7).</param>
+		/// <returns>A new sbyte with the bit toggled.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-7.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static sbyte ToggleBitAt(this sbyte data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 7)
-                BitDebug.Throw($"sbyte.ToggleBitAt(int) - position must be between 0 and 7 but was {pos}");
+			if (pos < 0 || pos > 7) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-7, was {pos}.");
 #endif
 			return (sbyte)(data ^ (1 << pos));
 		}
 
 		/// <summary>
 		/// Sets the bit at the specified position to the given value (0 or 1).
-		/// The position must be between 0 and 7.
 		/// </summary>
 		/// <param name="data">The sbyte value.</param>
-		/// <param name="pos">The bit position (0–7).</param>
-		/// <param name="bit">The bit value to set (0 or 1).</param>
-		/// <returns>A new sbyte with the specified bit updated.</returns>
+		/// <param name="pos">The bit position (0 to 7).</param>
+		/// <param name="bit">The bit value (0 or 1).</param>
+		/// <returns>A new sbyte with the bit set to the specified value.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-7 or bit is not 0/1.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static sbyte SetBit(this sbyte data, int pos, int bit)
+		public static sbyte SetBitValueAt(this sbyte data, int pos, int bit)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 7)
-                BitDebug.Throw($"sbyte.SetBit(int, int) - position must be between 0 and 7 but was {pos}");
-            if (bit != 0 && bit != 1)
-                BitDebug.Throw($"sbyte.SetBit(int, int) - bit value must be either 0 or 1 but was {bit}");
+			if (pos < 0 || pos > 7) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-7, was {pos}.");
+			if (bit != 0 && bit != 1) throw new ArgumentOutOfRangeException(nameof(bit), $"Bit value must be 0 or 1, was {bit}.");
 #endif
-			int mask = 1 << pos;
-			int m1 = (bit << pos) & mask;
-			int m2 = data & ~mask;
-			return (sbyte)(m2 | m1);
+			return (sbyte)(data & ~(1 << pos) | (bit << pos));
 		}
 
 		/// <summary>
-		/// Counts the number of bits set to 1 in the sbyte value.
+		/// Counts the number of bits set to 1 in the sbyte (population count).
 		/// </summary>
 		/// <param name="data">The sbyte value.</param>
-		/// <returns>The number of set bits.</returns>
+		/// <returns>The number of 1 bits (0 to 8).</returns>
+		/// <remarks>Uses a parallel bit summation algorithm for efficiency.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int PopCount(this sbyte data) => ((byte)data).PopCount();
+		public static int PopCount(this sbyte data)
+		{
+			uint v = (uint)(byte)data;
+			v = v - ((v >> 1) & 0x55);
+			v = (v & 0x33) + ((v >> 2) & 0x33);
+			return (int)((v + (v >> 4)) & 0x0F);
+		}
 
 		/// <summary>
-		/// Determines whether the sbyte value is a power of two.
+		/// Determines if the sbyte is a power of two (positive only).
 		/// </summary>
 		/// <param name="value">The sbyte value.</param>
-		/// <returns><c>true</c> if the value is a power of two; otherwise, <c>false</c>.</returns>
+		/// <returns>True if the value is a positive power of 2 (1, 2, 4, 8, etc.); otherwise, false.</returns>
+		/// <remarks>Always returns false for negative values due to signed integer representation.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static bool IsPowerOfTwo(this sbyte value) =>
-			value != 0 && (value & (value - 1)) == 0;
+		public static bool IsPowerOfTwo(this sbyte value) => value > 0 && (value & (value - 1)) == 0;
 
 		/// <summary>
-		/// Retrieves the byte corresponding to the sbyte value.
-		/// For sbyte, the only valid index is 0.
+		/// Retrieves the byte representation of the sbyte value (position must be 0).
 		/// </summary>
 		/// <param name="data">The sbyte value.</param>
-		/// <param name="pos">The byte position, must be 0.</param>
+		/// <param name="pos">The byte position (must be 0).</param>
 		/// <returns>The byte representation of the sbyte.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0.</exception>
+		/// <remarks>This method is trivial for an 8-bit type and may be deprecated in future versions.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static byte ByteAt(this sbyte data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos != 0)
-                BitDebug.Throw($"sbyte.ByteAt(int) - position must be 0 but was {pos}");
+			if (pos != 0) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0, was {pos}.");
 #endif
 			return (byte)data;
 		}
 
 		/// <summary>
-		/// Replaces the sbyte with a new byte value.
-		/// For sbyte, the only valid index is 0.
+		/// Replaces the sbyte with a new byte value (position must be 0).
 		/// </summary>
 		/// <param name="data">The sbyte value.</param>
-		/// <param name="newData">The new byte to set.</param>
-		/// <param name="pos">The byte position, must be 0.</param>
+		/// <param name="newData">The new byte value.</param>
+		/// <param name="pos">The byte position (must be 0).</param>
 		/// <returns>A new sbyte with the value replaced.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0.</exception>
+		/// <remarks>This method is trivial for an 8-bit type and may be deprecated in future versions.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static sbyte SetByteAt(this sbyte data, byte newData, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos != 0)
-                BitDebug.Throw($"sbyte.SetByteAt(int) - position must be 0 but was {pos}");
+			if (pos != 0) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0, was {pos}.");
 #endif
 			return (sbyte)newData;
 		}
 
 		/// <summary>
-		/// Returns an 8-character string representing the binary form of the sbyte value.
-		/// The string is constructed from bit 7 (most significant) to bit 0 (least significant).
+		/// Returns the binary string representation of the sbyte (8 characters of '0' or '1').
 		/// </summary>
 		/// <param name="value">The sbyte value.</param>
-		/// <returns>An 8-character binary string.</returns>
+		/// <returns>An 8-character string of bits, e.g., "00001111" for 15.</returns>
+		/// <remarks>For performance-critical code, consider avoiding string allocation. Negative values are represented in two's complement.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static string BitString(this sbyte value) =>
-			((byte)value).BitString();
+		public static string BitString(this sbyte value)
+		{
+			char[] bits = new char[8];
+			for (int i = 7; i >= 0; i--)
+			{
+				bits[7 - i] = (char)('0' + ((value >> i) & 1));
+			}
+			return new string(bits);
+		}
 
 		/// <summary>
-		/// Converts 8 characters from a binary string, starting at the specified index, into an sbyte.
+		/// Converts an 8-character substring of binary digits starting at <paramref name="readIndex"/> into an sbyte.
 		/// </summary>
-		/// <param name="data">A binary string representing 8 bits.</param>
-		/// <param name="readIndex">The starting index in the string.</param>
-		/// <returns>An sbyte corresponding to the binary string.</returns>
+		/// <param name="data">The string of '0' and '1' characters.</param>
+		/// <param name="readIndex">The starting index (must allow 8 characters).</param>
+		/// <returns>The sbyte value represented by the substring.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if readIndex is invalid.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static sbyte SByteFromBitString(this string data, int readIndex) =>
-			(sbyte)data.ByteFromBitString(readIndex);
+		public static sbyte SByteFromBitString(this string data, int readIndex)
+		{
+#if BITCORE_DEBUG
+			if (readIndex < 0 || readIndex + 8 > data.Length)
+				throw new ArgumentOutOfRangeException(nameof(readIndex), $"readIndex + 8 ({readIndex + 8}) exceeds string length ({data.Length}).");
+#endif
+			sbyte value = 0;
+			for (int i = 0; i < 8; i++)
+			{
+				value = (sbyte)((value << 1) | (data[readIndex + i] - '0'));
+			}
+			return value;
+		}
 
 		/// <summary>
 		/// Converts the first 8 characters of a binary string into an sbyte.
 		/// </summary>
-		/// <param name="data">A binary string representing 8 bits.</param>
-		/// <returns>An sbyte corresponding to the binary string.</returns>
+		/// <param name="data">The string of '0' and '1' characters.</param>
+		/// <returns>The sbyte value from the first 8 characters.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if string is too short.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static sbyte SByteFromBitString(this string data) =>
-			data.SByteFromBitString(0);
+		public static sbyte SByteFromBitString(this string data) => data.SByteFromBitString(0);
 
 		/// <summary>
-		/// Returns the hexadecimal string representation of the sbyte value.
+		/// Returns the hexadecimal string representation of the sbyte.
 		/// </summary>
 		/// <param name="value">The sbyte value.</param>
-		/// <returns>A hexadecimal string.</returns>
+		/// <returns>A string like "FF" for -1 or "7F" for 127.</returns>
+		/// <remarks>For performance-critical code, consider avoiding string allocation.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif

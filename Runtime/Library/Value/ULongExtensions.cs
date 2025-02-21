@@ -6,292 +6,251 @@
 #define BITCORE_METHOD_INLINE
 #endif
 
-using System;
 #if BITCORE_METHOD_INLINE
 using System.Runtime.CompilerServices;
 #endif
-using System.Text;
+
+using System;
 
 namespace BitCore
 {
 	/// <summary>
-	/// Provides extension methods for the <see cref="ulong"/> type.
-	/// <para>
-	/// These methods offer bit-level operations, string conversions, and bit counting on a 64‑bit unsigned value.
-	/// </para>
-	/// <para>
-	/// Performance Note: In editor or debug builds, error checks are enabled; these are removed in production.
-	/// </para>
-	/// <para>
-	/// Critical Changes: 20/12/2018 – Functions are hinted for aggressive inlining on .NET 4.6 targets.
-	/// </para>
+	/// Provides high-performance extension methods for the <see cref="ulong"/> type, optimized for bit manipulation and conversions.
+	/// <para>See also: <see href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/ulong">ulong keyword</see>.</para>
+	/// <para><b>Performance Note:</b> Methods are aggressively inlined in .NET 4.6+ builds. Debug checks are included in development builds and stripped in release for maximum speed.</para>
+	/// <para><b>Change History:</b>
+	/// <list type="bullet">
+	///   <item>20/12/2018: Added AggressiveInlining for .NET 4.6 targets.</item>
+	/// </list></para>
 	/// </summary>
 	public static class ULongExtensions
 	{
 		/// <summary>
-		/// Returns <c>true</c> if the <see cref="ulong"/> value is greater than zero.
+		/// Converts the <see cref="ulong"/> value to a boolean.
 		/// </summary>
 		/// <param name="data">The ulong value.</param>
-		/// <returns><c>true</c> if the value is greater than zero; otherwise, <c>false</c>.</returns>
+		/// <returns>True if the value is greater than zero; otherwise, false.</returns>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static bool Bool(this ulong data) => data > 0;
 
 		/// <summary>
-		/// Retrieves the bit (0 or 1) at the specified position in the ulong value.
-		/// Position must be between 0 (least significant) and 63 (most significant).
+		/// Gets the bit value (0 or 1) at the specified position.
 		/// </summary>
 		/// <param name="data">The ulong value.</param>
-		/// <param name="pos">The bit position (0–63).</param>
-		/// <returns>The bit value (0 or 1) at the specified position.</returns>
+		/// <param name="pos">The bit position (0 to 63).</param>
+		/// <returns>1 if the bit is set; 0 if cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-63.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int BitAt(this ulong data, int pos)
+		public static ulong BitAt(this ulong data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 63)
-            {
-                BitDebug.Throw($"ulong.BitAt(int) - position must be between 0 and 63 but was {pos}");
-            }
+			if (pos < 0 || pos > 63) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-63, was {pos}.");
 #endif
-			return (int)((data >> pos) & 1);
+			return (data >> pos) & 1ul;
 		}
 
 		/// <summary>
-		/// Returns the inverted bit (1 becomes 0 and 0 becomes 1) at the specified position.
-		/// Position must be between 0 and 63.
+		/// Gets the inverted bit value (0 or 1) at the specified position.
 		/// </summary>
 		/// <param name="data">The ulong value.</param>
-		/// <param name="pos">The bit position (0–63).</param>
-		/// <returns>The inverted bit (0 or 1) at the specified position.</returns>
+		/// <param name="pos">The bit position (0 to 63).</param>
+		/// <returns>0 if the bit is set; 1 if cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-63.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int BitInvAt(this ulong data, int pos)
+		public static ulong BitInvAt(this ulong data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 63)
-            {
-                BitDebug.Throw($"ulong.BitInvAt(int) - position must be between 0 and 63 but was {pos}");
-            }
+			if (pos < 0 || pos > 63) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-63, was {pos}.");
 #endif
-			return 1 - (int)((data >> pos) & 1);
+			return (~data >> pos) & 1ul;
 		}
 
 		/// <summary>
 		/// Sets the bit at the specified position to 1.
-		/// Position must be between 0 and 63.
 		/// </summary>
 		/// <param name="data">The ulong value.</param>
-		/// <param name="pos">The bit position (0–63).</param>
-		/// <returns>A new ulong with the specified bit set.</returns>
+		/// <param name="pos">The bit position (0 to 63).</param>
+		/// <returns>A new ulong with the bit set.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-63.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static ulong SetBitAt(this ulong data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 63)
-            {
-                BitDebug.Throw($"ulong.SetBitAt(int) - position must be between 0 and 63 but was {pos}");
-            }
+			if (pos < 0 || pos > 63) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-63, was {pos}.");
 #endif
 			return data | (1ul << pos);
 		}
 
 		/// <summary>
-		/// Clears (sets to 0) the bit at the specified position.
-		/// Position must be between 0 and 63.
+		/// Clears the bit at the specified position to 0.
 		/// </summary>
 		/// <param name="data">The ulong value.</param>
-		/// <param name="pos">The bit position (0–63).</param>
-		/// <returns>A new ulong with the specified bit cleared.</returns>
+		/// <param name="pos">The bit position (0 to 63).</param>
+		/// <returns>A new ulong with the bit cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-63.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static ulong UnsetBitAt(this ulong data, int pos)
+		public static ulong ClearBitAt(this ulong data, int pos)
 		{
-#if BITCORE_METHOD_INLINE
-            // Check in debug mode.
-#endif
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 63)
-            {
-                BitDebug.Throw($"ulong.UnsetBitAt(int) - position must be between 0 and 63 but was {pos}");
-            }
+			if (pos < 0 || pos > 63) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-63, was {pos}.");
 #endif
 			return data & ~(1ul << pos);
 		}
 
 		/// <summary>
-		/// Toggles the bit at the specified position.
-		/// Position must be between 0 and 63.
+		/// Toggles the bit at the specified position (1 to 0, or 0 to 1).
 		/// </summary>
 		/// <param name="data">The ulong value.</param>
-		/// <param name="pos">The bit position (0–63).</param>
-		/// <returns>A new ulong with the specified bit toggled.</returns>
+		/// <param name="pos">The bit position (0 to 63).</param>
+		/// <returns>A new ulong with the bit toggled.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-63.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static ulong ToggleBitAt(this ulong data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 63)
-            {
-                BitDebug.Throw($"ulong.ToggleBitAt(int) - position must be between 0 and 63 but was {pos}");
-            }
+			if (pos < 0 || pos > 63) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-63, was {pos}.");
 #endif
 			return data ^ (1ul << pos);
 		}
 
 		/// <summary>
-		/// Sets the bit at the specified position to the given bit value (0 or 1).
-		/// Position must be between 0 and 63.
+		/// Sets the bit at the specified position to the given value (0 or 1).
 		/// </summary>
 		/// <param name="data">The ulong value.</param>
-		/// <param name="pos">The bit position (0–63).</param>
-		/// <param name="bit">The bit value (0 or 1) to set.</param>
-		/// <returns>A new ulong with the specified bit updated.</returns>
+		/// <param name="pos">The bit position (0 to 63).</param>
+		/// <param name="bit">The bit value (0 or 1).</param>
+		/// <returns>A new ulong with the bit set to the specified value.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-63 or bit is not 0/1.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static ulong SetBit(this ulong data, int pos, long bit)
+		public static ulong SetBitValueAt(this ulong data, int pos, int bit)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 63)
-            {
-                BitDebug.Throw($"ulong.SetBit(int, int) - position must be between 0 and 63 but was {pos}");
-            }
-            if (bit != 0 && bit != 1)
-            {
-                BitDebug.Throw($"ulong.SetBit(int, int) - bit value must be either 0 or 1 but was {bit}");
-            }
+			if (pos < 0 || pos > 63) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-63, was {pos}.");
+			if (bit != 0 && bit != 1) throw new ArgumentOutOfRangeException(nameof(bit), $"Bit value must be 0 or 1, was {bit}.");
 #endif
-			ulong mask = 1ul << pos;
-			ulong m1 = ((ulong)bit << pos) & mask;
-			ulong m2 = data & ~mask;
-			return m2 | m1;
+			return data & ~(1ul << pos) | ((ulong)bit << pos);
 		}
 
 		/// <summary>
-		/// Returns the number of bits set to 1 in the ulong value.
-		/// Uses a general purpose Hamming Weight algorithm.
+		/// Counts the number of bits set to 1 in the ulong (population count).
 		/// </summary>
 		/// <param name="value">The ulong value.</param>
-		/// <returns>The population count (number of set bits).</returns>
+		/// <returns>The number of 1 bits (0 to 64).</returns>
+		/// <remarks>Uses a parallel bit summation algorithm (Hamming Weight) for efficiency.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static int PopCount(this ulong value)
 		{
-			ulong value0 = value - ((value >> 1) & 0x5555555555555555);
-			ulong value1 = (value0 & 0x3333333333333333) + ((value0 >> 2) & 0x3333333333333333);
-			ulong value2 = (value1 + (value1 >> 4)) & 0x0f0f0f0f0f0f0f0f;
+			ulong value0 = value - ((value >> 1) & 0x5555555555555555ul);
+			ulong value1 = (value0 & 0x3333333333333333ul) + ((value0 >> 2) & 0x3333333333333333ul);
+			ulong value2 = (value1 + (value1 >> 4)) & 0x0f0f0f0f0f0f0f0ful;
 
-			return (int)((value2 * 0x0101010101010101) >> 56);
+			return (int)((value2 * 0x0101010101010101ul) >> 56);
 		}
 
 		/// <summary>
-		/// Determines whether the ulong value is a power of two.
+		/// Determines if the ulong is a power of two.
 		/// </summary>
 		/// <param name="value">The ulong value.</param>
-		/// <returns><c>true</c> if the value is a power of two; otherwise, <c>false</c>.</returns>
+		/// <returns>True if the value is a power of 2 (1, 2, 4, 8, etc.); otherwise, false.</returns>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static bool IsPowerOfTwo(this ulong value) =>
-			value != 0 && (value & (value - 1)) == 0;
+		public static bool IsPowerOfTwo(this ulong value) => value != 0 && (value & (value - 1)) == 0;
 
 		/// <summary>
-		/// Retrieves the byte at the specified position from the ulong value.
-		/// The position must be between 0 (most significant byte) and 7 (least significant byte).
+		/// Retrieves the byte at the specified position within the ulong (big-endian order).
 		/// </summary>
 		/// <param name="data">The ulong value.</param>
-		/// <param name="pos">The byte position (0–7).</param>
+		/// <param name="pos">The byte position (0 to 7, where 0 is the most significant byte).</param>
 		/// <returns>The byte at the specified position.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-7.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static byte ByteAt(this ulong data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 7)
-            {
-                BitDebug.Throw($"ulong.ByteAt(int) - position must be between 0 and 7 but was {pos}");
-            }
+			if (pos < 0 || pos > 7) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-7, was {pos}.");
 #endif
 			return (byte)(data >> (56 - (pos * 8)));
 		}
 
 		/// <summary>
-		/// Replaces the byte at the specified position in the ulong value with a new byte.
-		/// The position must be between 0 (most significant byte) and 7 (least significant byte).
+		/// Sets the byte at the specified position within the ulong (big-endian order).
 		/// </summary>
 		/// <param name="data">The ulong value.</param>
-		/// <param name="newData">The new byte to set.</param>
-		/// <param name="pos">The byte position (0–7).</param>
-		/// <returns>A new ulong with the specified byte replaced.</returns>
+		/// <param name="newData">The new byte value.</param>
+		/// <param name="pos">The byte position (0 to 7, where 0 is the most significant byte).</param>
+		/// <returns>A new ulong with the byte replaced.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-7.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static ulong SetByteAt(this ulong data, byte newData, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 7)
-            {
-                BitDebug.Throw($"ulong.SetByteAt(int) - position must be between 0 and 7 but was {pos}");
-            }
+			if (pos < 0 || pos > 7) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-7, was {pos}.");
 #endif
 			int shift = 56 - (pos * 8);
 			ulong mask = 0xFFul << shift;
-			ulong m1 = ((ulong)newData << shift) & mask;
-			ulong m2 = data & ~mask;
-			return m2 | m1;
+			return (data & ~mask) | ((ulong)newData << shift);
 		}
 
 		/// <summary>
-		/// Returns a 64-character string representing the binary form of the ulong value.
-		/// Each character is '0' or '1', corresponding to each bit (from bit 63 to bit 0).
+		/// Returns the binary string representation of the ulong (64 characters of '0' or '1').
 		/// </summary>
 		/// <param name="value">The ulong value.</param>
-		/// <returns>A 64-character binary string.</returns>
+		/// <returns>A 64-character string of bits, e.g., "000...001111" for 15.</returns>
+		/// <remarks>For performance-critical code, consider avoiding string allocation.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static string BitString(this ulong value)
 		{
-			var sb = new StringBuilder(64);
+			char[] bits = new char[64];
 			for (int i = 63; i >= 0; i--)
 			{
-				sb.Append(value.BitAt(i));
+				bits[63 - i] = (char)('0' + ((value >> i) & 1));
 			}
-			return sb.ToString();
+			return new string(bits);
 		}
 
 		/// <summary>
-		/// Converts 64 characters from a binary string (starting at the specified index) into a ulong.
-		/// The method reads 64 characters from the string to form the value.
+		/// Converts a 64-character substring of binary digits starting at <paramref name="readIndex"/> into a ulong.
 		/// </summary>
-		/// <param name="data">A binary string representing bits.</param>
-		/// <param name="readIndex">The starting index in the string.</param>
-		/// <returns>A ulong corresponding to the binary string.</returns>
+		/// <param name="data">The string of '0' and '1' characters.</param>
+		/// <param name="readIndex">The starting index (must allow 64 characters).</param>
+		/// <returns>The ulong value represented by the substring.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if readIndex is invalid.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static ulong ULongFromBitString(this string data, int readIndex)
 		{
 #if BITCORE_DEBUG
-            if ((readIndex + 64) > data.Length)
-            {
-                BitDebug.Throw("string.ULongFromBitString(int) - read index and ulong length exceed string length");
-            }
+			if (readIndex < 0 || readIndex + 64 > data.Length)
+				throw new ArgumentOutOfRangeException(nameof(readIndex), $"readIndex + 64 ({readIndex + 64}) exceeds string length ({data.Length}).");
 #endif
 			ulong value = 0;
-			for (int i = readIndex, j = 63; i < readIndex + 64; i++, j--)
+			for (int i = 0; i < 64; i++)
 			{
-				value = data[i] == '1' ? value.SetBitAt(j) : value.UnsetBitAt(j);
+				value = (value << 1) | (ulong)(data[readIndex + i] - '0');
 			}
 			return value;
 		}
@@ -299,22 +258,23 @@ namespace BitCore
 		/// <summary>
 		/// Converts the first 64 characters of a binary string into a ulong.
 		/// </summary>
-		/// <param name="data">A binary string representing 64 bits.</param>
-		/// <returns>A ulong corresponding to the binary string.</returns>
+		/// <param name="data">The string of '0' and '1' characters.</param>
+		/// <returns>The ulong value from the first 64 characters.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if string is too short.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static ulong ULongFromBitString(this string data) =>
-			data.ULongFromBitString(0);
+		public static ulong ULongFromBitString(this string data) => data.ULongFromBitString(0);
 
 		/// <summary>
-		/// Returns the hexadecimal string representation of the ulong value.
+		/// Returns the hexadecimal string representation of the ulong.
 		/// </summary>
 		/// <param name="value">The ulong value.</param>
-		/// <returns>A hexadecimal string.</returns>
+		/// <returns>A string like "FFFFFFFFFFFFFFFF" for 18446744073709551615.</returns>
+		/// <remarks>For performance-critical code, consider avoiding string allocation.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static string HexString(this ulong value) => value.ToString("X");
+		public static string HexString(this ulong value) => value.ToString("X"); // Ensures 16 digits
 	}
 }

@@ -6,273 +6,277 @@
 #define BITCORE_METHOD_INLINE
 #endif
 
+#if BITCORE_METHOD_INLINE
+using System.Runtime.CompilerServices;
+#endif
+
 using System;
 
 namespace BitCore
 {
 	/// <summary>
-	/// Provides extension methods for the <see cref="int"/> value type.
-	/// The int is a signed 32‑bit integer.
-	/// <para>
-	/// Performance Note: In the Unity Editor or debug builds, error checks are enabled;
-	/// these checks are removed in production builds.
-	/// </para>
-	/// <para>
-	/// Critical Changes: 20/12/2018 – For .NET 4.6 targets, functions are hinted to use AggressiveInlining.
-	/// </para>
+	/// Provides high-performance extension methods for the <see cref="int"/> type, optimized for bit manipulation and conversions.
+	/// <para>An <see cref="int"/> is a signed 32-bit integer (-2,147,483,648 to 2,147,483,647).</para>
+	/// <para>See also: <see href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/int">int keyword</see>.</para>
+	/// <para><b>Performance Note:</b> Methods are aggressively inlined in .NET 4.6+ builds. Debug checks are included in development builds and stripped in release for maximum speed.</para>
+	/// <para><b>Change History:</b>
+	/// <list type="bullet">
+	///   <item>20/12/2018: Added AggressiveInlining for .NET 4.6 targets.</item>
+	/// </list></para>
 	/// </summary>
 	public static class IntExtensions
 	{
 		/// <summary>
-		/// Returns <c>true</c> if the int value is greater than zero.
+		/// Converts the <see cref="int"/> value to a boolean.
 		/// </summary>
 		/// <param name="data">The int value.</param>
-		/// <returns><c>true</c> if the value is greater than zero; otherwise, <c>false</c>.</returns>
+		/// <returns>True if the value is greater than zero; otherwise, false.</returns>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static bool Bool(this int data) => data > 0;
 
 		/// <summary>
-		/// Retrieves the bit value (0 or 1) at the specified bit position [0, 31].
+		/// Gets the bit value (0 or 1) at the specified position.
 		/// </summary>
 		/// <param name="data">The int value.</param>
-		/// <param name="pos">The bit position (0 = least significant, 31 = most significant).</param>
-		/// <returns>The bit (0 or 1) at the specified position.</returns>
+		/// <param name="pos">The bit position (0 to 31).</param>
+		/// <returns>1 if the bit is set; 0 if cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31.</exception>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static int BitAt(this int data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"int.BitAt(int) - position must be between 0 and 31 but was {pos}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
 #endif
 			return (data >> pos) & 1;
 		}
 
 		/// <summary>
-		/// Retrieves the inverted bit (1 becomes 0 and 0 becomes 1) at the specified position [0, 31].
+		/// Gets the inverted bit value (0 or 1) at the specified position.
 		/// </summary>
 		/// <param name="data">The int value.</param>
 		/// <param name="pos">The bit position (0 to 31).</param>
-		/// <returns>The inverted bit value (0 or 1) at the specified position.</returns>
+		/// <returns>0 if the bit is set; 1 if cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31.</exception>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static int BitInvAt(this int data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"int.BitInvAt(int) - position must be between 0 and 31 but was {pos}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
 #endif
-			return 1 - ((data >> pos) & 1);
+			return (~data >> pos) & 1;
 		}
 
 		/// <summary>
-		/// Sets the bit at the specified position [0, 31] to 1.
+		/// Sets the bit at the specified position to 1.
 		/// </summary>
 		/// <param name="data">The int value.</param>
 		/// <param name="pos">The bit position (0 to 31).</param>
-		/// <returns>A new int with the specified bit set to 1.</returns>
+		/// <returns>A new int with the bit set.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31.</exception>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static int SetBitAt(this int data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"int.SetBitAt(int) - position must be between 0 and 31 but was {pos}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
 #endif
 			return data | (1 << pos);
 		}
 
 		/// <summary>
-		/// Clears the bit at the specified position [0, 31] (sets it to 0).
+		/// Clears the bit at the specified position to 0.
 		/// </summary>
 		/// <param name="data">The int value.</param>
 		/// <param name="pos">The bit position (0 to 31).</param>
-		/// <returns>A new int with the specified bit cleared.</returns>
+		/// <returns>A new int with the bit cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31.</exception>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int UnsetBitAt(this int data, int pos)
+		public static int ClearBitAt(this int data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"int.UnsetBitAt(int) - position must be between 0 and 31 but was {pos}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
 #endif
 			return data & ~(1 << pos);
 		}
 
 		/// <summary>
-		/// Toggles the bit at the specified position [0, 31].
+		/// Toggles the bit at the specified position (1 to 0, or 0 to 1).
 		/// </summary>
 		/// <param name="data">The int value.</param>
 		/// <param name="pos">The bit position (0 to 31).</param>
-		/// <returns>A new int with the specified bit toggled.</returns>
+		/// <returns>A new int with the bit toggled.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31.</exception>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static int ToggleBitAt(this int data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"int.ToggleBitAt(int) - position must be between 0 and 31 but was {pos}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
 #endif
 			return data ^ (1 << pos);
 		}
 
 		/// <summary>
-		/// Sets the bit at the specified position [0, 31] to the given bit value (0 or 1).
+		/// Sets the bit at the specified position to the given value (0 or 1).
 		/// </summary>
 		/// <param name="data">The int value.</param>
 		/// <param name="pos">The bit position (0 to 31).</param>
-		/// <param name="bit">The bit value (0 or 1) to set.</param>
-		/// <returns>A new int with the specified bit updated.</returns>
+		/// <param name="bit">The bit value (0 or 1).</param>
+		/// <returns>A new int with the bit set to the specified value.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-31 or bit is not 0/1.</exception>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int SetBit(this int data, int pos, int bit)
+		public static int SetBitValueAt(this int data, int pos, int bit)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 31)
-            {
-                BitDebug.Throw($"int.SetBit(int, int) - position must be between 0 and 31 but was {pos}");
-            }
-            if (bit != 0 && bit != 1)
-            {
-                BitDebug.Throw($"int.SetBit(int, int) - bit value must be either 0 or 1 but was {bit}");
-            }
+			if (pos < 0 || pos > 31) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-31, was {pos}.");
+			if (bit != 0 && bit != 1) throw new ArgumentOutOfRangeException(nameof(bit), $"Bit value must be 0 or 1, was {bit}.");
 #endif
-			int mask = 1 << pos;
-			int m1 = (bit << pos) & mask;
-			int m2 = data & ~mask;
-			return m2 | m1;
+			return data & ~(1 << pos) | (bit << pos);
 		}
 
 		/// <summary>
-		/// Counts the number of bits set to 1 in the int value (population count).
+		/// Counts the number of bits set to 1 in the int (population count).
 		/// </summary>
 		/// <param name="value">The int value.</param>
-		/// <returns>The number of bits set to 1.</returns>
+		/// <returns>The number of 1 bits (0 to 32).</returns>
+		/// <remarks>Uses a parallel bit summation algorithm (Hamming Weight) for efficiency.</remarks>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int PopCount(this int value) =>
-			((uint)value).PopCount();
+		public static int PopCount(this int value)
+		{
+			uint v = (uint)value;
+
+			v = v - ((v >> 1) & 0x55555555);
+			v = (v & 0x33333333) + ((v >> 2) & 0x33333333);
+
+			return (int)(((v + (v >> 4)) & 0x0F0F0F0F) * 0x01010101 >> 24);
+		}
 
 		/// <summary>
-		/// Determines whether the int value is a power of two.
+		/// Determines if the int is a power of two (positive only).
 		/// </summary>
 		/// <param name="value">The int value.</param>
-		/// <returns><c>true</c> if the value is a power of two; otherwise, <c>false</c>.</returns>
+		/// <returns>True if the value is a positive power of 2 (1, 2, 4, 8, etc.); otherwise, false.</returns>
+		/// <remarks>Always returns false for negative values due to signed integer representation.</remarks>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static bool IsPowerOfTwo(this int value) =>
-			value != 0 && (value & (value - 1)) == 0;
+		public static bool IsPowerOfTwo(this int value) => value > 0 && (value & (value - 1)) == 0;
 
 		/// <summary>
-		/// Retrieves the byte at the specified position from the int value.
-		/// The int is treated as a 32‑bit number, and the position must be between 0 (most significant byte)
-		/// and 3 (least significant byte).
+		/// Retrieves the byte at the specified position within the int (big-endian order).
 		/// </summary>
 		/// <param name="data">The int value.</param>
-		/// <param name="pos">The byte position (0 to 3).</param>
+		/// <param name="pos">The byte position (0 to 3, where 0 is the most significant byte).</param>
 		/// <returns>The byte at the specified position.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-3.</exception>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static byte ByteAt(this int data, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 3)
-            {
-                BitDebug.Throw($"int.ByteAt(int) - position must be between 0 and 3 but was {pos}");
-            }
+			if (pos < 0 || pos > 3) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-3, was {pos}.");
 #endif
 			return (byte)(data >> (24 - (pos * 8)));
 		}
 
 		/// <summary>
-		/// Replaces the byte at the specified position in the int value with a new byte value.
-		/// The position must be between 0 (most significant byte) and 3 (least significant byte).
+		/// Sets the byte at the specified position within the int (big-endian order).
 		/// </summary>
 		/// <param name="data">The int value.</param>
-		/// <param name="newData">The new byte to insert.</param>
-		/// <param name="pos">The byte position (0 to 3).</param>
-		/// <returns>A new int with the specified byte replaced.</returns>
+		/// <param name="newData">The new byte value.</param>
+		/// <param name="pos">The byte position (0 to 3, where 0 is the most significant byte).</param>
+		/// <returns>A new int with the byte replaced.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is not 0-3.</exception>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static int SetByteAt(this int data, byte newData, int pos)
 		{
 #if BITCORE_DEBUG
-            if (pos < 0 || pos > 3)
-            {
-                BitDebug.Throw($"int.SetByteAt(int) - position must be between 0 and 3 but was {pos}");
-            }
+			if (pos < 0 || pos > 3) throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be 0-3, was {pos}.");
 #endif
 			int shift = 24 - (pos * 8);
 			int mask = 0xFF << shift;
-			int m1 = (newData << shift) & mask;
-			int m2 = data & ~mask;
-			return m2 | m1;
+			return (data & ~mask) | (newData << shift);
 		}
 
 		/// <summary>
-		/// Returns a 32-character string representing the binary sequence of the int value.
-		/// Each character is either '0' or '1', corresponding to each bit.
+		/// Returns the binary string representation of the int (32 characters of '0' or '1').
 		/// </summary>
 		/// <param name="value">The int value.</param>
-		/// <returns>A binary string of 32 characters.</returns>
+		/// <returns>A 32-character string of bits, e.g., "00000000000000000000000000001111" for 15.</returns>
+		/// <remarks>For performance-critical code, consider avoiding string allocation.</remarks>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static string BitString(this int value) =>
-			((uint)value).BitString();
+		public static string BitString(this int value)
+		{
+			char[] bits = new char[32];
+			for (int i = 31; i >= 0; i--)
+			{
+				bits[31 - i] = (char)('0' + ((value >> i) & 1));
+			}
+			return new string(bits);
+		}
 
 		/// <summary>
-		/// Converts a binary string starting at the specified index into an int.
-		/// The method reads 32 characters from the string to form the int value.
+		/// Converts a 32-character substring of binary digits starting at <paramref name="readIndex"/> into an int.
 		/// </summary>
-		/// <param name="data">A binary string representing 32 bits.</param>
-		/// <param name="readIndex">The starting index in the string.</param>
-		/// <returns>An int corresponding to the binary string.</returns>
+		/// <param name="data">The string of '0' and '1' characters.</param>
+		/// <param name="readIndex">The starting index (must allow 32 characters).</param>
+		/// <returns>The int value represented by the substring.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if readIndex is invalid.</exception>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-		public static int IntFromBitString(this string data, int readIndex) =>
-			(int)data.UIntFromBitString(readIndex);
+		public static int IntFromBitString(this string data, int readIndex)
+		{
+#if BITCORE_DEBUG
+			if (readIndex < 0 || readIndex + 32 > data.Length)
+				throw new ArgumentOutOfRangeException(nameof(readIndex), $"readIndex + 32 ({readIndex + 32}) exceeds string length ({data.Length}).");
+#endif
+			int value = 0;
+			for (int i = 0; i < 32; i++)
+			{
+				value = (value << 1) | (data[readIndex + i] - '0');
+			}
+			return value;
+		}
 
 		/// <summary>
 		/// Converts the first 32 characters of a binary string into an int.
 		/// </summary>
-		/// <param name="data">A binary string representing 32 bits.</param>
-		/// <returns>An int corresponding to the binary string.</returns>
+		/// <param name="data">The string of '0' and '1' characters.</param>
+		/// <returns>The int value from the first 32 characters.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if string is too short.</exception>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static int IntFromBitString(this string data) => data.IntFromBitString(0);
 
 		/// <summary>
-		/// Returns the hexadecimal string representation of the int value.
+		/// Returns the hexadecimal string representation of the int.
 		/// </summary>
 		/// <param name="value">The int value.</param>
-		/// <returns>A hexadecimal string representation.</returns>
+		/// <returns>A string like "FFFFFFFF" for -1 or "7FFFFFFF" for 2147483647.</returns>
+		/// <remarks>For performance-critical code, consider avoiding string allocation.</remarks>
 #if BITCORE_METHOD_INLINE
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
 		public static string HexString(this int value) => value.ToString("X");
 	}

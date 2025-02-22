@@ -13,189 +13,208 @@ using System.Runtime.CompilerServices;
 
 namespace BitCore
 {
-    /// <summary>
-    /// A uint-backed array for efficient bit-level manipulation.
-    /// Bits are stored in big-endian order within each 32-bit word (MSB at position 0).
-    /// </summary>
-    public class BitArray32 : IBitArray
-    {
-        /// <summary>
-        /// Number of bits per element in the underlying uint array (32 bits per word).
-        /// </summary>
-        public const int BitsPerElement = 32;
+	/// <summary>
+	/// A uint-backed array for efficient bit-level manipulation.
+	/// Bits are stored in big-endian order within each 32-bit word (MSB at position 0).
+	/// </summary>
+	public class BitArray32 : IBitArray
+	{
+		/// <summary>
+		/// Number of bits per element in the underlying uint array (32 bits per word).
+		/// </summary>
+		public const int BitsPerElement = 32;
 
-        private readonly uint[] _array;
+		private readonly uint[] _array;
 
-        /// <summary>
-        /// Initializes a new BitArray32 with the specified number of bits.
-        /// </summary>
-        /// <param name="bitCount">Total number of bits to allocate (default is 32).</param>
-        /// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if bitCount is negative.</exception>
-        public BitArray32(int bitCount = 32)
-        {
+		/// <summary>
+		/// Initializes a new BitArray32 with the specified number of bits.
+		/// </summary>
+		/// <param name="bitCount">Total number of bits to allocate (default is 32).</param>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if bitCount is negative.</exception>
+		public BitArray32(int bitCount = 32)
+		{
 #if BITCORE_DEBUG
-            if (bitCount < 0)
-                throw new ArgumentOutOfRangeException(nameof(bitCount), "Bit count must be non-negative.");
+			if (bitCount < 0)
+				throw new ArgumentOutOfRangeException(nameof(bitCount), "Bit count must be non-negative.");
 #endif
-            bitCount = Math.Max(bitCount, 1); // Ensure at least 1 word
-            int uintCount = (bitCount + BitsPerElement - 1) / BitsPerElement; // Round up
-            _array = new uint[uintCount];
-        }
+			bitCount = Math.Max(bitCount, 1); // Ensure at least 1 word
+			int uintCount = (bitCount + BitsPerElement - 1) / BitsPerElement; // Round up
+			_array = new uint[uintCount];
+		}
 
-        /// <summary>
-        /// Gets the underlying uint array storing the bits.
-        /// </summary>
-        public uint[] Elements => _array;
+		/// <summary>
+		/// Gets the underlying uint array storing the bits.
+		/// </summary>
+		public uint[] Elements => _array;
 
-        /// <summary>
-        /// Gets the number of uint words in the array.
-        /// </summary>
-        public int ElementLength => _array.Length;
+		/// <summary>
+		/// Gets the total number of bits in the array.
+		/// </summary>
+		public int BitLength => _array.Length * BitsPerElement;
 
-        /// <summary>
-        /// Gets the total number of bits in the array.
-        /// </summary>
-        public int BitLength => _array.Length * BitsPerElement;
+		/// <summary>
+		/// Gets the number of bytes in the array.
+		/// </summary>
+		public int ByteLength => BitLength / 8;
 
-        /// <summary>
-        /// Gets the value of the bit at the specified position.
-        /// </summary>
-        /// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
-        /// <returns>1 if the bit is set, 0 if cleared.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is out of range.</exception>
-        /// <remarks>Bits within each uint are big-endian (MSB at position 0).</remarks>
+		/// <summary>
+		/// Gets the value of the bit at the specified position.
+		/// </summary>
+		/// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
+		/// <returns>1 if the bit is set, 0 if cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is out of range.</exception>
+		/// <remarks>Bits within each uint are big-endian (MSB at position 0).</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public int GetBitAt(int pos)
-        {
+		public int GetBitAt(int pos)
+		{
 #if BITCORE_DEBUG
-            ValidatePosition(pos);
+			ValidatePosition(pos);
 #endif
-            int index = pos / BitsPerElement;
-            int bitOffset = pos % BitsPerElement;
-            return (int)_array[index].BitAt(bitOffset);
-        }
+			int index = pos / BitsPerElement;
+			int bitOffset = pos % BitsPerElement;
 
-        /// <summary>
-        /// Gets the inverted value of the bit at the specified position.
-        /// </summary>
-        /// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
-        /// <returns>0 if the bit is set, 1 if cleared.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is out of range.</exception>
-        /// <remarks>Bits within each uint are big-endian (MSB at position 0).</remarks>
+			return (int)_array[index].BitAt(bitOffset);
+		}
+
+		/// <summary>
+		/// Gets the inverted value of the bit at the specified position.
+		/// </summary>
+		/// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
+		/// <returns>0 if the bit is set, 1 if cleared.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is out of range.</exception>
+		/// <remarks>Bits within each uint are big-endian (MSB at position 0).</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public int GetBitInvAt(int pos)
-        {
+		public int GetBitInvAt(int pos)
+		{
 #if BITCORE_DEBUG
-            ValidatePosition(pos);
+			ValidatePosition(pos);
 #endif
-            int index = pos / BitsPerElement;
-            int bitOffset = pos % BitsPerElement;
-            return (int)_array[index].BitInvAt(bitOffset);
-        }
+			int index = pos / BitsPerElement;
+			int bitOffset = pos % BitsPerElement;
 
-        /// <summary>
-        /// Sets the bit at the specified position to 1.
-        /// </summary>
-        /// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
-        /// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is out of range.</exception>
+			return (int)_array[index].BitInvAt(bitOffset);
+		}
+
+		/// <summary>
+		/// Sets the bit at the specified position to 1.
+		/// </summary>
+		/// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is out of range.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public void SetBitAt(int pos)
-        {
+		public void SetBitAt(int pos)
+		{
 #if BITCORE_DEBUG
-            ValidatePosition(pos);
+			ValidatePosition(pos);
 #endif
-            int index = pos / BitsPerElement;
-            int bitOffset = pos % BitsPerElement;
-            _array[index] = _array[index].SetBitAt(bitOffset);
-        }
+			int index = pos / BitsPerElement;
+			int bitOffset = pos % BitsPerElement;
 
-        /// <summary>
-        /// Sets the bit at the specified position to the given value (0 or 1).
-        /// </summary>
-        /// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
-        /// <param name="bitValue">The value to set (0 or 1).</param>
-        /// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos or bitValue is invalid.</exception>
+			_array[index] = _array[index].SetBitAt(bitOffset);
+		}
+
+		/// <summary>
+		/// Sets the bit at the specified position to the given value (0 or 1).
+		/// </summary>
+		/// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
+		/// <param name="bitValue">The value to set (0 or 1).</param>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos or bitValue is invalid.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public void SetBitValueAt(int pos, int bitValue)
-        {
+		public void SetBitValueAt(int pos, int bitValue)
+		{
 #if BITCORE_DEBUG
-            ValidatePosition(pos);
-            if (bitValue != 0 && bitValue != 1)
-                throw new ArgumentOutOfRangeException(nameof(bitValue), "Bit value must be 0 or 1.");
+			ValidatePosition(pos);
+			if (bitValue != 0 && bitValue != 1)
+				throw new ArgumentOutOfRangeException(nameof(bitValue), "Bit value must be 0 or 1.");
 #endif
-            int index = pos / BitsPerElement;
-            int bitOffset = pos % BitsPerElement;
-            _array[index] = _array[index].SetBitValueAt(bitOffset, bitValue);
-        }
+			int index = pos / BitsPerElement;
+			int bitOffset = pos % BitsPerElement;
 
-        /// <summary>
-        /// Clears the bit at the specified position (sets it to 0).
-        /// </summary>
-        /// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
-        /// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is out of range.</exception>
+			_array[index] = _array[index].SetBitValueAt(bitOffset, bitValue);
+		}
+
+		/// <summary>
+		/// Clears the bit at the specified position (sets it to 0).
+		/// </summary>
+		/// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is out of range.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public void ClearBitAt(int pos)
-        {
+		public void ClearBitAt(int pos)
+		{
 #if BITCORE_DEBUG
-            ValidatePosition(pos);
+			ValidatePosition(pos);
 #endif
-            int index = pos / BitsPerElement;
-            int bitOffset = pos % BitsPerElement;
-            _array[index] = _array[index].ClearBitAt(bitOffset);
-        }
+			int index = pos / BitsPerElement;
+			int bitOffset = pos % BitsPerElement;
 
-        /// <summary>
-        /// Toggles the bit at the specified position (0 to 1, or 1 to 0).
-        /// </summary>
-        /// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
-        /// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is out of range.</exception>
+			_array[index] = _array[index].ClearBitAt(bitOffset);
+		}
+
+		/// <summary>
+		/// Toggles the bit at the specified position (0 to 1, or 1 to 0).
+		/// </summary>
+		/// <param name="pos">The zero-based bit position (0 to BitLength - 1).</param>
+		/// <exception cref="ArgumentOutOfRangeException">In debug mode, thrown if pos is out of range.</exception>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public void ToggleBitAt(int pos)
-        {
+		public void ToggleBitAt(int pos)
+		{
 #if BITCORE_DEBUG
-            ValidatePosition(pos);
+			ValidatePosition(pos);
 #endif
-            int index = pos / BitsPerElement;
-            int bitOffset = pos % BitsPerElement;
-            _array[index] = _array[index].ToggleBitAt(bitOffset);
-        }
+			int index = pos / BitsPerElement;
+			int bitOffset = pos % BitsPerElement;
 
-        /// <summary>
-        /// Counts the number of bits set to 1 in the BitArray32.
-        /// </summary>
-        /// <returns>The total number of set bits.</returns>
-        /// <remarks>Optimized to process each uint directly, leveraging UIntExtensions.PopCount.</remarks>
+			_array[index] = _array[index].ToggleBitAt(bitOffset);
+		}
+
+		/// <summary>
+		/// Counts the number of bits set to 1 in the BitArray32.
+		/// </summary>
+		/// <returns>The total number of set bits.</returns>
+		/// <remarks>Optimized to process each uint directly, leveraging UIntExtensions.PopCount.</remarks>
 #if BITCORE_METHOD_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public int PopCount()
-        {
-            int count = 0;
-            foreach (uint value in _array)
-            {
-                count += value.PopCount();
-            }
-            return count;
-        }
+		public int PopCount()
+		{
+			int count = 0;
+			int fullWords = BitLength / BitsPerElement;
+
+			for (int i = 0; i < fullWords; i++)
+			{
+				count += _array[i].PopCount();
+			}
+
+			int excessBits = BitLength % BitsPerElement;
+
+			if (excessBits > 0)
+			{
+				int lastIndex = fullWords;
+				uint lastWord = _array[lastIndex];
+				uint mask = (uint)(0xFFFFFFFFu << (BitsPerElement - excessBits));
+				count += (lastWord & mask).PopCount();
+			}
+
+			return count;
+		}
 
 #if BITCORE_DEBUG
-        private void ValidatePosition(int pos)
-        {
-            if (pos < 0 || pos >= BitLength)
-                throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be between 0 and {BitLength - 1}, was {pos}.");
-        }
+		private void ValidatePosition(int pos)
+		{
+			if (pos < 0 || pos >= BitLength)
+				throw new ArgumentOutOfRangeException(nameof(pos), $"Position must be between 0 and {BitLength - 1}, was {pos}.");
+		}
 #endif
-    }
+	}
 }

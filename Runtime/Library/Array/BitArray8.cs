@@ -50,7 +50,7 @@ namespace BitCore
 		/// <summary>
 		/// Gets the number of bytes in the array.
 		/// </summary>
-		public int ByteLength => _array.Length;
+		public int ByteLength => BitLength / 8;
 
 		/// <summary>
 		/// Gets the total number of bits in the array.
@@ -74,6 +74,7 @@ namespace BitCore
 #endif
 			int index = pos / BitsPerElement;
 			int bitOffset = pos % BitsPerElement;
+
 			return _array[index].BitAt(bitOffset);
 		}
 
@@ -94,6 +95,7 @@ namespace BitCore
 #endif
 			int index = pos / BitsPerElement;
 			int bitOffset = pos % BitsPerElement;
+
 			return _array[index].BitInvAt(bitOffset);
 		}
 
@@ -112,6 +114,7 @@ namespace BitCore
 #endif
 			int index = pos / BitsPerElement;
 			int bitOffset = pos % BitsPerElement;
+
 			_array[index] = _array[index].SetBitAt(bitOffset);
 		}
 
@@ -133,6 +136,7 @@ namespace BitCore
 #endif
 			int index = pos / BitsPerElement;
 			int bitOffset = pos % BitsPerElement;
+
 			_array[index] = _array[index].SetBitValueAt(bitOffset, bitValue);
 		}
 
@@ -151,6 +155,7 @@ namespace BitCore
 #endif
 			int index = pos / BitsPerElement;
 			int bitOffset = pos % BitsPerElement;
+
 			_array[index] = _array[index].ClearBitAt(bitOffset);
 		}
 
@@ -169,6 +174,7 @@ namespace BitCore
 #endif
 			int index = pos / BitsPerElement;
 			int bitOffset = pos % BitsPerElement;
+
 			_array[index] = _array[index].ToggleBitAt(bitOffset);
 		}
 
@@ -183,10 +189,26 @@ namespace BitCore
 		public int PopCount()
 		{
 			int count = 0;
-			foreach (byte value in _array)
+			int fullBytes = BitLength / BitsPerElement; // Number of complete bytes
+
+			// Count full bytes
+			for (int i = 0; i < fullBytes; i++)
 			{
-				count += value.PopCount();
+				count += _array[i].PopCount();
 			}
+
+			int excessBits = BitLength % BitsPerElement; // Remaining bits in last byte
+
+			// Handle excess bits in the last byte, if any
+			if (excessBits > 0)
+			{
+				int lastIndex = fullBytes;
+				byte lastByte = _array[lastIndex];
+				// Mask to keep only the excessBits (left-aligned, big-endian)
+				byte mask = (byte)(0xFF << (BitsPerElement - excessBits));
+				count += (lastByte & mask).PopCount();
+			}
+
 			return count;
 		}
 

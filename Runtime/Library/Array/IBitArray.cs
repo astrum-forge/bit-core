@@ -11,6 +11,11 @@ namespace BitCore
         int BitLength { get; }
 
         /// <summary>
+        /// Gets the total number of bytes in the array.
+        /// </summary>
+        int ByteLength { get; }
+
+        /// <summary>
         /// Gets the value of the bit at the specified position.
         /// </summary>
         /// <param name="pos">The zero-based bit position.</param>

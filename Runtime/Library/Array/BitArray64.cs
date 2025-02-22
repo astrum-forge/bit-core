@@ -25,6 +25,7 @@ namespace BitCore
 		public const int BitsPerElement = 64;
 
 		private readonly ulong[] _array;
+		private readonly int _bitLength;
 
 		/// <summary>
 		/// Initializes a new BitArray64 with the specified number of bits.
@@ -40,6 +41,7 @@ namespace BitCore
 			bitCount = Math.Max(bitCount, 1); // Ensure at least 1 word
 			int ulongCount = (bitCount + BitsPerElement - 1) / BitsPerElement; // Round up
 			_array = new ulong[ulongCount];
+			_bitLength = bitCount;
 		}
 
 		/// <summary>
@@ -50,12 +52,40 @@ namespace BitCore
 		/// <summary>
 		/// Gets the total number of bits in the array.
 		/// </summary>
-		public int BitLength => _array.Length * BitsPerElement;
+		public int BitLength => _bitLength;
 
 		/// <summary>
 		/// Gets the number of bytes in the array.
 		/// </summary>
 		public int ByteLength => BitLength / 8;
+
+		/// <summary>
+		/// Fills the array with all 1's (enables all bits)
+		/// </summary>
+		public void Fill()
+		{
+			int Length = _array.Length;
+
+			// Count full bytes
+			for (int i = 0; i < Length; i++)
+			{
+				_array[i] = 0xFFFFFFFFFFFFFFFFul;
+			}
+		}
+
+		/// <summary>
+		/// Fills the array with all 0's (clears all bits)
+		/// </summary>
+		public void Clear()
+		{
+			int Length = _array.Length;
+
+			// Count full bytes
+			for (int i = 0; i < Length; i++)
+			{
+				_array[i] = 0;
+			}
+		}
 
 		/// <summary>
 		/// Gets the value of the bit at the specified position.
@@ -189,21 +219,27 @@ namespace BitCore
 		public int PopCount()
 		{
 			int count = 0;
-			int fullWords = BitLength / BitsPerElement;
+			int fullWords = _array.Length;
 
-			for (int i = 0; i < fullWords; i++)
+			// Count full bytes
+			for (int i = 0; i < fullWords - 1; i++)
 			{
 				count += _array[i].PopCount();
 			}
 
 			int excessBits = BitLength % BitsPerElement;
 
+			// Handle excess bits in the last byte, if any
 			if (excessBits > 0)
 			{
-				int lastIndex = fullWords;
-				ulong lastWord = _array[lastIndex];
-				ulong mask = (ulong)(0xFFFFFFFFFFFFFFFFul << (BitsPerElement - excessBits));
+				ulong lastWord = _array[fullWords - 1];
+				// Mask to keep only the excessBits (left-aligned, big-endian)
+				ulong mask = 0xFFFFFFFFFFFFFFFFul >> (BitsPerElement - excessBits);
 				count += (lastWord & mask).PopCount();
+			}
+			else
+			{
+				count += _array[fullWords - 1].PopCount();
 			}
 
 			return count;

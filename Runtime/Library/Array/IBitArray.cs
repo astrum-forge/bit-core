@@ -55,6 +55,16 @@ namespace BitCore
         void ToggleBitAt(int pos);
 
         /// <summary>
+        /// Fills the array with all 1's (enables all bits)
+        /// </summary>
+        void Fill();
+
+        /// <summary>
+        /// Fills the array with all 0's (clears all bits)
+        /// </summary>
+        void Clear();
+
+        /// <summary>
         /// Counts the number of bits set to 1 in the array.
         /// </summary>
         /// <returns>The total number of set bits.</returns>

@@ -30,7 +30,6 @@ namespace BitCore.Tests
             }
 
             // get all the internal bits
-            // set all the internal bits
             for (int i = 0; i < LoopCount; i++)
             {
                 int actual = array.GetBitAt(i);
@@ -135,6 +134,24 @@ namespace BitCore.Tests
 
             int popCount = array.PopCount();
             Assert.AreEqual(PopCount, popCount, $"BitArray8.PopCount should be {PopCount}, but was {popCount}.");
+        }
+
+        [Test]
+        public static void Test_FillClear()
+        {
+            BitArray8 array = new BitArray8(LoopCount);
+
+            array.Fill();
+
+            int popCount = array.PopCount();
+
+            Assert.AreEqual(LoopCount, popCount, $"BitArray8.PopCount should be {LoopCount}, but was {popCount}.");
+
+            array.Clear();
+
+            popCount = array.PopCount();
+
+            Assert.AreEqual(0, popCount, $"BitArray8.PopCount should be {0}, but was {popCount}.");
         }
     }
 }

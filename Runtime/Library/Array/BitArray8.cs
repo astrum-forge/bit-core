@@ -25,6 +25,7 @@ namespace BitCore
 		public const int BitsPerElement = 8;
 
 		private readonly byte[] _array;
+		private readonly int _bitLength;
 
 		/// <summary>
 		/// Initializes a new BitArray8 with the specified number of bits.
@@ -40,6 +41,7 @@ namespace BitCore
 			bitCount = Math.Max(bitCount, 1); // Ensure at least 1 byte
 			int byteCount = (bitCount + BitsPerElement - 1) / BitsPerElement; // Round up
 			_array = new byte[byteCount];
+			_bitLength = bitCount;
 		}
 
 		/// <summary>
@@ -55,7 +57,35 @@ namespace BitCore
 		/// <summary>
 		/// Gets the total number of bits in the array.
 		/// </summary>
-		public int BitLength => _array.Length * BitsPerElement;
+		public int BitLength => _bitLength;
+
+		/// <summary>
+		/// Fills the array with all 1's (enables all bits)
+		/// </summary>
+		public void Fill()
+		{
+			int Length = _array.Length;
+
+			// Count full bytes
+			for (int i = 0; i < Length; i++)
+			{
+				_array[i] = 0xFF;
+			}
+		}
+
+		/// <summary>
+		/// Fills the array with all 0's (clears all bits)
+		/// </summary>
+		public void Clear()
+		{
+			int Length = _array.Length;
+
+			// Count full bytes
+			for (int i = 0; i < Length; i++)
+			{
+				_array[i] = 0;
+			}
+		}
 
 		/// <summary>
 		/// Gets the value of the bit at the specified position.
@@ -189,24 +219,27 @@ namespace BitCore
 		public int PopCount()
 		{
 			int count = 0;
-			int fullBytes = BitLength / BitsPerElement; // Number of complete bytes
+			int fullBytes = _array.Length;
 
 			// Count full bytes
-			for (int i = 0; i < fullBytes; i++)
+			for (int i = 0; i < fullBytes - 1; i++)
 			{
 				count += _array[i].PopCount();
 			}
 
-			int excessBits = BitLength % BitsPerElement; // Remaining bits in last byte
+			int excessBits = BitLength % BitsPerElement;
 
 			// Handle excess bits in the last byte, if any
 			if (excessBits > 0)
 			{
-				int lastIndex = fullBytes;
-				byte lastByte = _array[lastIndex];
+				byte lastByte = _array[fullBytes - 1];
 				// Mask to keep only the excessBits (left-aligned, big-endian)
-				byte mask = (byte)(0xFF << (BitsPerElement - excessBits));
+				byte mask = (byte)(0xFF >> (BitsPerElement - excessBits));
 				count += (lastByte & mask).PopCount();
+			}
+			else
+			{
+				count += _array[fullBytes - 1].PopCount();
 			}
 
 			return count;

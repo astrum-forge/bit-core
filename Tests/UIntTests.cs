@@ -18,11 +18,11 @@ namespace BitCore.Tests
 		// Expected bits for TestValue (bit positions 0 through 31)
 		private static readonly int[] ExpectedBits =
 		{
-		0, 1, 1, 0, 1, 0, 0, 0,
-		0, 1, 0, 0, 1, 0, 1, 0,
-		0, 0, 1, 0, 1, 1, 1, 0,
-		0, 0, 0, 0, 0, 0, 0, 0
-	};
+			0, 1, 1, 0, 1, 0, 0, 0,
+			0, 1, 0, 0, 1, 0, 1, 0,
+			0, 0, 1, 0, 1, 1, 1, 0,
+			0, 0, 0, 0, 0, 0, 0, 0
+		};
 
 		// Expected bytes when splitting TestValue
 		private static readonly byte[] ExpectedBytes = { 127, 246, 0, 187 };

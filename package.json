@@ -1,6 +1,6 @@
 {
   "name": "com.astrumforge.bitcore",
-  "version": "1.22.0",
+  "version": "1.23.0",
   "displayName": "BitCore",
   "description": "A lightweight, high-performance C# library for bit manipulation and tuple conversions, optimized for Unity and real-time applications.",
   "unity": "2020.3",
